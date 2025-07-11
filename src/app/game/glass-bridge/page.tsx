@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
+import { checkGameOver } from '@/lib/lives'
 
 interface Tile {
   id: number
@@ -25,6 +26,12 @@ export default function GlassBridgeGame() {
   const gameInterval = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
+    // Check if game is over
+    if (checkGameOver()) {
+      window.location.href = '/'
+      return
+    }
+
     const saved = localStorage.getItem('nickname')
     if (saved) {
       setNickname(saved)

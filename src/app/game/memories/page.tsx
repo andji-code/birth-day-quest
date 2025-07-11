@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useRouter } from 'next/navigation'
+import { checkGameOver, loseLife } from '@/lib/lives'
 
 export default function MemoriesGame() {
   const [gameState, setGameState] = useState<'waiting' | 'playing' | 'won' | 'lost'>('waiting')
@@ -17,6 +18,7 @@ export default function MemoriesGame() {
   const [nickname, setNickname] = useState('')
   const [score, setScore] = useState(0)
   const [timeLeft, setTimeLeft] = useState(60)
+  const [lives, setLives] = useState(3)
   const gameInterval = useRef<NodeJS.Timeout | null>(null)
   const router = useRouter()
 
@@ -24,10 +26,23 @@ export default function MemoriesGame() {
   const correctAnswers = ['курка', 'петух', 'скаймаг', 'skywrath mage', 'skywrath']
 
   useEffect(() => {
+    // Check if game is over
+    if (checkGameOver()) {
+      window.location.href = '/'
+      return
+    }
+
     setIsClient(true)
     const saved = localStorage.getItem('nickname')
     if (saved) {
       setNickname(saved)
+    }
+    
+    // Load player lives
+    const playerLives = localStorage.getItem('playerLives')
+    if (playerLives) {
+      const livesData = JSON.parse(playerLives)
+      setLives(livesData[1] || 3) // Player ID 1 for Валентин
     }
     
     // Generate particles on client side only
@@ -62,6 +77,16 @@ export default function MemoriesGame() {
   const endGame = (result: 'won' | 'lost') => {
     setGameState(result)
     if (gameInterval.current) clearInterval(gameInterval.current)
+    
+    if (result === 'lost') {
+      const gameOver = loseLife(1, 'memories')
+      if (gameOver) {
+        router.push('/')
+        return
+      }
+      // Update lives state
+      setLives(prev => Math.max(0, prev - 1))
+    }
   }
 
   const handleSubmitAnswer = () => {
@@ -154,8 +179,8 @@ export default function MemoriesGame() {
           </div>
           <div className="text-white font-mono text-sm space-y-1">
             <div className="flex items-center">
-              <span className="text-cyan-400 mr-2">🧠</span>
-              <span>Тест: <span className="text-cyan-400 font-bold">Пам'ять</span></span>
+              <span className="text-red-400 mr-2">❤️</span>
+              <span>Життя: <span className="text-red-400 font-bold">{'❤️'.repeat(lives)}</span></span>
             </div>
             <div className="flex items-center">
               <span className="text-purple-400 mr-2">🏆</span>

@@ -3,6 +3,23 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Disable pull-to-refresh on mobile browsers */
+html, body {
+  overscroll-behavior: none;
+  touch-action: manipulation;
+}
+
+/* Game container specific touch handling */
+#game-container {
+  touch-action: none;
+  overscroll-behavior: contain;
+}
+
+/* Prevent pull-to-refresh specifically */
+body {
+  overscroll-behavior-y: none;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -149,6 +166,10 @@
   .opacity-15 {
     opacity: 0.15;
   }
+  
+  .grid-cols-12 {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+  }
 }
 
 @keyframes float {
@@ -167,6 +188,15 @@
   75% {
     transform: translateY(-35px) rotate(270deg) scale(1.05);
     opacity: 0.2;
+  }
+}
+
+@keyframes gridMove {
+  0% {
+    transform: translateX(0px) translateY(0px);
+  }
+  100% {
+    transform: translateX(30px) translateY(30px);
   }
 }
 

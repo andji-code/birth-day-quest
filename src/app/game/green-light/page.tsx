@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
+import { loseLife, checkGameOver } from '@/lib/lives'
 
 export default function GreenLightGame() {
   const [gameState, setGameState] = useState<'waiting' | 'playing' | 'won' | 'lost'>('waiting')
@@ -13,17 +14,31 @@ export default function GreenLightGame() {
   const [score, setScore] = useState(0)
   const [nickname, setNickname] = useState('')
   const [lightIntensity, setLightIntensity] = useState(0)
+  const [lives, setLives] = useState(3)
   const router = useRouter()
   const gameInterval = useRef<NodeJS.Timeout | null>(null)
   const lightInterval = useRef<NodeJS.Timeout | null>(null)
   const intensityInterval = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
+    // Check if game is over
+    if (checkGameOver()) {
+      router.push('/')
+      return
+    }
+
     const saved = localStorage.getItem('nickname')
     if (saved) {
       setNickname(saved)
     }
-  }, [])
+
+    // Load player lives
+    const playerLives = localStorage.getItem('playerLives')
+    if (playerLives) {
+      const livesData = JSON.parse(playerLives)
+      setLives(livesData[1] || 3) // Player ID 1 for Валентин
+    }
+  }, [router])
 
   const startGame = () => {
     setGameState('playing')
@@ -59,6 +74,17 @@ export default function GreenLightGame() {
     if (lightInterval.current) clearInterval(lightInterval.current)
     if (gameInterval.current) clearInterval(gameInterval.current)
     if (intensityInterval.current) clearInterval(intensityInterval.current)
+    
+    // Lose life if game is lost
+    if (result === 'lost') {
+      const gameOver = loseLife(1, 'green-light')
+      if (gameOver) {
+        router.push('/')
+        return
+      }
+      // Update lives state
+      setLives(prev => Math.max(0, prev - 1))
+    }
   }
 
   const handleMove = () => {
@@ -139,6 +165,14 @@ export default function GreenLightGame() {
           <div className="text-white font-mono text-sm">
             <div>Позиція: <span className="text-green-400 font-bold">{playerPosition}%</span></div>
             <div>Рахунок: <span className="text-purple-400 font-bold">{score}</span></div>
+            <div className="flex items-center space-x-1">
+              <span>Життя:</span>
+              {[1, 2, 3].map((life) => (
+                <span key={life} className="text-lg">
+                  {life <= lives ? '❤️' : '💔'}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
 

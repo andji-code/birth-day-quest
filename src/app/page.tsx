@@ -5,13 +5,21 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { checkGameOver } from '@/lib/lives'
 
 export default function Home() {
   const [nickname, setNickname] = useState('')
   const [savedNickname, setSavedNickname] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [gameOver, setGameOver] = useState(false)
 
   useEffect(() => {
+    // Check if game is over
+    if (checkGameOver()) {
+      setGameOver(true)
+      return
+    }
+
     // Load nickname from localStorage on component mount
     const saved = localStorage.getItem('nickname')
     if (saved) {
@@ -28,6 +36,13 @@ export default function Home() {
         setSavedNickname(nickname.trim())
         setNickname('')
         setIsLoading(false)
+        
+        // Clear eliminated players and game progress when first joining the game
+        localStorage.removeItem('eliminatedPlayers')
+        localStorage.removeItem('eliminationUsed')
+        localStorage.removeItem('gameProgress')
+        localStorage.removeItem('totalWinnings')
+        localStorage.removeItem('eliminationOrder')
       }, 500)
     }
   }
@@ -139,7 +154,38 @@ export default function Home() {
       </div>
 
       <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
-        <Card className="w-full max-w-sm backdrop-blur-md bg-black/90 border border-cyan-500/40 shadow-2xl shadow-cyan-500/30 relative overflow-hidden">
+        {gameOver ? (
+          <Card className="w-full max-w-md backdrop-blur-md bg-black/90 border border-red-500/40 shadow-2xl shadow-red-500/30 relative overflow-hidden">
+            <CardHeader className="text-center space-y-4 pb-6 relative z-10">
+              <CardTitle className="text-3xl font-black bg-gradient-to-r from-red-400 to-pink-400 bg-clip-text text-transparent tracking-wider">
+                💀 ГРА ЗАКІНЧЕНА 💀
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="text-center space-y-6 relative z-10">
+              <div className="p-4 bg-gradient-to-r from-red-600/30 to-pink-600/30 rounded-none border border-red-400/40 backdrop-blur-sm">
+                <p className="text-white font-bold text-lg">
+                  Ти втратив всі життя! 😵
+                </p>
+                <p className="text-red-400 text-sm mt-2">
+                  Наступна гра пройде лише через рік...
+                </p>
+                <p className="text-yellow-400 text-sm mt-2">
+                  Повертайся в {localStorage.getItem('gameOverYear')} році!
+                </p>
+              </div>
+              <Button
+                onClick={() => {
+                  localStorage.removeItem('playerLives')
+                  setGameOver(false)
+                }}
+                className="w-full bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 text-white font-bold py-3 px-6 rounded-none border border-red-400/60 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-red-500/30"
+              >
+                <span className="font-mono tracking-wider">СПРОБУВАТИ ЗНОВУ 💀</span>
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="w-full max-w-sm backdrop-blur-md bg-black/90 border border-cyan-500/40 shadow-2xl shadow-cyan-500/30 relative overflow-hidden">
           {/* Card background pattern */}
           <div className="absolute inset-0 opacity-5">
             <div className="absolute inset-0" style={{
@@ -235,7 +281,23 @@ export default function Home() {
                 <div className="flex space-x-2">
                   <Button
                     onClick={() => {
-                      localStorage.removeItem('nickname')
+                      // Save the game over year and player lives if they exist
+                      const gameOverYear = localStorage.getItem('gameOverYear')
+                      const playerLives = localStorage.getItem('playerLives')
+                      
+                      // Clear all localStorage except game over year and player lives
+                      localStorage.clear()
+                      
+                      // Restore game over year if it existed
+                      if (gameOverYear) {
+                        localStorage.setItem('gameOverYear', gameOverYear)
+                      }
+                      
+                      // Restore player lives if they existed
+                      if (playerLives) {
+                        localStorage.setItem('playerLives', playerLives)
+                      }
+                      
                       setSavedNickname('')
                     }}
                     variant="outline"
@@ -248,6 +310,19 @@ export default function Home() {
                   </Button>
                   <Button
                     onClick={() => {
+                      // Check if game is over before starting
+                      if (checkGameOver()) {
+                        setGameOver(true)
+                        return
+                      }
+                      
+                      // Clear eliminated players and game progress when starting a new game
+                      localStorage.removeItem('eliminatedPlayers')
+                      localStorage.removeItem('eliminationUsed')
+                      localStorage.removeItem('gameProgress')
+                      localStorage.removeItem('totalWinnings')
+                      localStorage.removeItem('eliminationOrder')
+                      
                       const progress = localStorage.getItem('gameProgress')
                       if (progress) {
                         const round = parseInt(progress)
@@ -270,6 +345,9 @@ export default function Home() {
                           case 6:
                             window.location.href = '/game/token-catcher'
                             break
+                          case 7:
+                            window.location.href = '/game/maze'
+                            break
                           default:
                             window.location.href = '/game/green-light'
                         }
@@ -289,6 +367,7 @@ export default function Home() {
             )}
           </CardContent>
         </Card>
+        )}
       </div>
 
       {/* Enhanced bottom scan line effect */}

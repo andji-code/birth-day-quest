@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
+import { checkGameOver } from '@/lib/lives'
 
 interface Player {
   id: number
@@ -11,6 +12,7 @@ interface Player {
   avatar: string
   isAlive: boolean
   isEliminated: boolean
+  lives: number
 }
 
 interface DeathReason {
@@ -28,18 +30,20 @@ export default function EliminationScreen() {
   const [eliminatedPlayer, setEliminatedPlayer] = useState<Player | null>(null)
   const [deathReason, setDeathReason] = useState('')
   const [particles, setParticles] = useState<Array<{id: number, left: number, top: number, delay: number, duration: number}>>([])
+  const [eliminationUsed, setEliminationUsed] = useState(false)
+  const [eliminationOrder, setEliminationOrder] = useState<{[key: number]: number}>({})
   
   const router = useRouter()
 
   const [players, setPlayers] = useState<Player[]>([
-    { id: 1, name: 'Валентин', avatar: 'https://i.pinimg.com/736x/fe/38/aa/fe38aac98a27218a3c1f3ab4cfe55d6a.jpg', isAlive: true, isEliminated: false },
-    { id: 2, name: 'Андрій', avatar: 'blob:https://web.telegram.org/550c2e7d-2d04-4b3c-b8f1-2d95ad0c4d57', isAlive: true, isEliminated: false },
-    { id: 3, name: 'Ярік', avatar: 'https://web.telegram.org/bd86b9be-3ba4-4774-a81a-e28bb18ef456', isAlive: true, isEliminated: false },
-    { id: 4, name: 'Діма', avatar: 'https://web.telegram.org/449a8fef-617a-4f9c-8f98-78c3a37b0830', isAlive: true, isEliminated: false },
-    { id: 5, name: 'Міша', avatar: 'https://web.telegram.org/f8a0935b-22ee-44f8-8477-73d449c5be51', isAlive: true, isEliminated: false },
-    { id: 6, name: 'Тоха', avatar: 'https://web.telegram.org/e21789c7-3ddd-4a06-ae9a-0c06360ee36f', isAlive: true, isEliminated: false },
-    { id: 7, name: '456', avatar: 'https://preview.redd.it/when-you-realize-that-player-456-won-45-6-billion-because-v0-gk7gabfx62fe1.jpeg?width=640&crop=smart&auto=webp&s=e74aa7af38bf857ae0e5f383beb6a8edc30f0be8', isAlive: true, isEliminated: false },
-    { id: 8, name: 'Guard', avatar: 'https://static.wikia.nocookie.net/thesquidgame/images/4/48/Soldier_1.jpg/revision/latest?cb=20211011195224', isAlive: true, isEliminated: false }
+    { id: 1, name: 'Валентин', avatar: 'https://i.pinimg.com/736x/fe/38/aa/fe38aac98a27218a3c1f3ab4cfe55d6a.jpg', isAlive: true, isEliminated: false, lives: 3 },
+    { id: 2, name: 'Андрій', avatar: 'https://i.pinimg.com/736x/23/d0/72/23d0726c0089b181582d18f5cf9eff97.jpg', isAlive: true, isEliminated: false, lives: 3 },
+    { id: 3, name: 'Ярік', avatar: 'https://i.pinimg.com/736x/5b/82/39/5b8239f7920fffdee4c4e69f64151a90.jpg', isAlive: true, isEliminated: false, lives: 3 },
+    { id: 4, name: 'Діма', avatar: 'https://i.pinimg.com/736x/7c/c0/05/7cc00545993bb0f425dc7eeab0b5e227.jpg', isAlive: true, isEliminated: false, lives: 3 },
+    { id: 5, name: 'Міша', avatar: 'https://i.pinimg.com/736x/cd/f3/87/cdf3871fa9f13fafc22862679ae20092.jpg', isAlive: true, isEliminated: false, lives: 3 },
+    { id: 6, name: 'Тоха', avatar: 'https://i.pinimg.com/736x/8c/86/ed/8c86edca77dca77021f0e3fd3abc60bf.jpg', isAlive: true, isEliminated: false, lives: 3 },
+    { id: 7, name: '456', avatar: 'https://preview.redd.it/when-you-realize-that-player-456-won-45-6-billion-because-v0-gk7gabfx62fe1.jpeg?width=640&crop=smart&auto=webp&s=e74aa7af38bf857ae0e5f383beb6a8edc30f0be8', isAlive: true, isEliminated: false, lives: 3 },
+    { id: 8, name: 'Guard', avatar: 'https://static.wikia.nocookie.net/thesquidgame/images/4/48/Soldier_1.jpg', isAlive: true, isEliminated: false, lives: 3 }
   ])
 
   const [deathReasons, setDeathReasons] = useState<DeathReason[]>([
@@ -56,6 +60,13 @@ export default function EliminationScreen() {
 
   useEffect(() => {
     setIsClient(true)
+    
+    // Check if game is over
+    if (checkGameOver()) {
+      router.push('/')
+      return
+    }
+    
     const saved = localStorage.getItem('nickname')
     if (saved) {
       setNickname(saved)
@@ -82,9 +93,45 @@ export default function EliminationScreen() {
     if (winnings) {
       setTotalWinnings(parseInt(winnings))
     }
-  }, [])
+
+    // Load elimination state
+    const eliminationState = localStorage.getItem('eliminationUsed')
+    if (eliminationState) {
+      setEliminationUsed(eliminationState === 'true')
+    }
+
+    // Load eliminated players
+    const eliminatedPlayers = localStorage.getItem('eliminatedPlayers')
+    if (eliminatedPlayers) {
+      const eliminatedIds = JSON.parse(eliminatedPlayers)
+      setPlayers(prev => prev.map(p => 
+        eliminatedIds.includes(p.id) 
+          ? { ...p, isAlive: false, isEliminated: true }
+          : p
+      ))
+    }
+
+    // Load elimination order
+    const savedEliminationOrder = localStorage.getItem('eliminationOrder')
+    if (savedEliminationOrder) {
+      setEliminationOrder(JSON.parse(savedEliminationOrder))
+    }
+
+    // Load player lives
+    const playerLives = localStorage.getItem('playerLives')
+    if (playerLives) {
+      const livesData = JSON.parse(playerLives)
+      setPlayers(prev => prev.map(p => 
+        livesData[p.id] !== undefined 
+          ? { ...p, lives: livesData[p.id] }
+          : p
+      ))
+    }
+  }, [router])
 
   const eliminateRandomPlayer = () => {
+    if (eliminationUsed) return // Prevent multiple eliminations
+
     const alivePlayers = players.filter(p => p.isAlive && p.name !== 'Валентин')
     if (alivePlayers.length === 0) return
 
@@ -99,15 +146,38 @@ export default function EliminationScreen() {
         : p
     ))
 
+    // Update elimination order
+    const currentEliminationCount = Object.keys(eliminationOrder).length + 1
+    const newEliminationOrder = {
+      ...eliminationOrder,
+      [randomPlayer.id]: currentEliminationCount
+    }
+    setEliminationOrder(newEliminationOrder)
+    localStorage.setItem('eliminationOrder', JSON.stringify(newEliminationOrder))
+
     // Mark reason as used
     setDeathReasons(prev => prev.map(r => 
       r.id === randomReason.id ? { ...r, used: true } : r
     ))
 
     // Update total winnings
-    const newWinnings = totalWinnings + 10
+    const bonus = 10
+    const newWinnings = totalWinnings + bonus
     setTotalWinnings(newWinnings)
     localStorage.setItem('totalWinnings', newWinnings.toString())
+
+    // Save eliminated players to localStorage
+    const eliminatedIds = players
+      .filter(p => !p.isAlive || p.isEliminated)
+      .map(p => p.id)
+    if (!eliminatedIds.includes(randomPlayer.id)) {
+      eliminatedIds.push(randomPlayer.id)
+    }
+    localStorage.setItem('eliminatedPlayers', JSON.stringify(eliminatedIds))
+
+    // Mark elimination as used
+    setEliminationUsed(true)
+    localStorage.setItem('eliminationUsed', 'true')
 
     // Show death popup
     setEliminatedPlayer(randomPlayer)
@@ -119,6 +189,10 @@ export default function EliminationScreen() {
     const nextRound = currentRound + 1
     setCurrentRound(nextRound)
     localStorage.setItem('gameProgress', nextRound.toString())
+    
+    // Reset elimination state for next round
+    setEliminationUsed(false)
+    localStorage.removeItem('eliminationUsed')
     
     // Route to next game based on current round
     switch (nextRound) {
@@ -137,8 +211,15 @@ export default function EliminationScreen() {
       case 6:
         router.push('/game/token-catcher')
         break
+      case 7:
+        router.push('/game/maze')
+        break
+      case 8:
+        // Final elimination - go to winner screen
+        router.push('/game/winner')
+        break
       default:
-        router.push('/game/token-catcher')
+        router.push('/game/winner')
     }
   }
 
@@ -202,10 +283,13 @@ export default function EliminationScreen() {
         {/* Title */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-black bg-gradient-to-r from-red-400 via-purple-400 to-blue-400 bg-clip-text text-transparent tracking-wider mb-2">
-            💀 ЕЛІМІНАЦІЯ 💀
+            {currentRound === 8 ? '💀 ФІНАЛЬНА ЕЛІМІНАЦІЯ 💀' : '💀 ЕЛІМІНАЦІЯ 💀'}
           </h1>
           <p className="text-gray-400 text-sm max-w-2xl mx-auto">
-            Після кожного раунду один гравець покидає гру. За кожну смерть +$10 до загального виграшу.
+            {currentRound === 8 
+              ? 'Останній гравець покидає гру. Ти залишаєшся єдиним вижившим!'
+              : 'Після кожного раунду один гравець покидає гру. За кожну смерть +$10 до загального виграшу.'
+            }
           </p>
         </div>
 
@@ -257,7 +341,7 @@ export default function EliminationScreen() {
                 <div className={`text-xs ${
                   player.isEliminated ? 'text-red-400' : 'text-gray-400'
                 }`}>
-                  {player.isEliminated ? 'ЕЛІМІНОВАНО' : 'ЖИВИЙ'}
+                  {player.isEliminated ? `ДОЖИВ ДО ТОП: ${eliminationOrder[player.id]}` : 'ЖИВИЙ'}
                 </div>
               </div>
             </div>
@@ -268,17 +352,29 @@ export default function EliminationScreen() {
         <div className="text-center space-y-4">
           <Button
             onClick={eliminateRandomPlayer}
-            disabled={aliveCount <= 1}
+            disabled={aliveCount <= 1 || eliminationUsed}
             className="bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 text-white font-bold py-4 px-8 rounded-none border border-red-400/60 transition-all duration-300 transform hover:scale-105 shadow-2xl shadow-red-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span className="font-mono tracking-wider text-lg">ЕЛІМІНУВАТИ ГРАВЦЯ 💀</span>
+            <span className="font-mono tracking-wider text-lg">
+              {eliminationUsed ? 'ЕЛІМІНАЦІЯ ВИКОНАНА 💀' : 'ЕЛІМІНУВАТИ ГРАВЦЯ 💀'}
+            </span>
           </Button>
           
           <Button
             onClick={goToNextGame}
-            className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-4 px-8 rounded-none border border-purple-400/60 transition-all duration-300 transform hover:scale-105 shadow-2xl shadow-purple-500/40"
+            disabled={!eliminationUsed}
+            className={`${
+              currentRound === 8 
+                ? 'bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 border-yellow-400/60 shadow-yellow-500/40'
+                : 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 border-purple-400/60 shadow-purple-500/40'
+            } text-white font-bold py-4 px-8 rounded-none border transition-all duration-300 transform hover:scale-105 shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed`}
           >
-            <span className="font-mono tracking-wider text-lg">НАСТУПНА ГРА 🎯</span>
+            <span className="font-mono tracking-wider text-lg">
+              {eliminationUsed 
+                ? (currentRound === 8 ? '👑 ПЕРЕМОЖЕЦЬ 👑' : 'НАСТУПНА ГРА 🎯')
+                : 'СПОЧАТКУ ЕЛІМІНУЙ ГРАВЦЯ 💀'
+              }
+            </span>
           </Button>
         </div>
       </div>
@@ -298,28 +394,53 @@ export default function EliminationScreen() {
             </button>
             <CardHeader className="text-center">
               <CardTitle className="text-red-400 font-black text-2xl animate-pulse">
-                💀 ЕЛІМІНАЦІЯ 💀
+                {currentRound === 8 ? '💀 ФІНАЛЬНА ЕЛІМІНАЦІЯ 💀' : '💀 ЕЛІМІНАЦІЯ 💀'}
               </CardTitle>
             </CardHeader>
             <CardContent className="text-center space-y-4">
-              <div className="relative">
-                <img
-                  src={coffinImage}
-                  alt="Coffin"
-                  className="w-20 h-20 mx-auto rounded-full object-cover"
-                />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-red-500 text-3xl">💀</span>
+              <div className="flex items-center justify-center space-x-4 mb-4">
+                {/* Before avatar */}
+                <div className="text-center">
+                  <img
+                    src={eliminatedPlayer.avatar}
+                    alt={eliminatedPlayer.name}
+                    className="w-16 h-16 rounded-full object-cover border-2 border-purple-400"
+                  />
+                  <p className="text-white text-xs mt-1">ДО</p>
+                </div>
+                
+                {/* Arrow */}
+                <div className="text-red-400 text-2xl animate-pulse">
+                  ➜
+                </div>
+                
+                {/* After avatar (coffin) */}
+                <div className="text-center">
+                  <div className="relative">
+                    <img
+                      src={coffinImage}
+                      alt="Coffin"
+                      className="w-16 h-16 rounded-full object-cover border-2 border-red-400"
+                    />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-red-500 text-xl">💀</span>
+                    </div>
+                  </div>
+                  <p className="text-red-400 text-xs mt-1">ПІСЛЯ</p>
                 </div>
               </div>
+              
               <p className="text-white text-lg font-bold">
                 {eliminatedPlayer.name}
               </p>
               <p className="text-red-400 text-sm">
                 {deathReason}
               </p>
+              <p className="text-yellow-400 font-bold">
+                ДОЖИВ ДО ТОП: {eliminationOrder[eliminatedPlayer.id]}
+              </p>
               <p className="text-green-400 font-bold">
-                +$10 до загального виграшу
+                +${currentRound === 8 ? '50' : '10'} до загального виграшу
               </p>
             </CardContent>
           </Card>

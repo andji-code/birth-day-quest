@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
+import { loseLife, checkGameOver } from '@/lib/lives'
 
 interface Token {
   id: number
@@ -22,8 +23,8 @@ export default function TokenCatcherGame() {
   const [balance, setBalance] = useState(500)
   const [gameTime, setGameTime] = useState(0)
   const [gameAreaRef, setGameAreaRef] = useState<HTMLDivElement | null>(null)
-  const [showBonusMessage, setShowBonusMessage] = useState(false)
-  const [bonusAmount, setBonusAmount] = useState(0)
+  const [lives, setLives] = useState(3)
+
 
   const [nickname, setNickname] = useState('')
   const router = useRouter()
@@ -50,6 +51,13 @@ export default function TokenCatcherGame() {
 
   useEffect(() => {
     setIsClient(true)
+    
+    // Check if game is over
+    if (checkGameOver()) {
+      router.push('/')
+      return
+    }
+    
     const saved = localStorage.getItem('nickname')
     if (saved) {
       setNickname(saved)
@@ -64,7 +72,14 @@ export default function TokenCatcherGame() {
       duration: 8 + Math.random() * 4
     }))
     setParticles(generatedParticles)
-  }, [])
+
+    // Load player lives
+    const playerLives = localStorage.getItem('playerLives')
+    if (playerLives) {
+      const livesData = JSON.parse(playerLives)
+      setLives(livesData[1] || 3) // Player ID 1 for Валентин
+    }
+  }, [router])
 
   const startGame = () => {
     setGameState('playing')
@@ -115,6 +130,17 @@ export default function TokenCatcherGame() {
     setGameState(result)
     if (gameInterval.current) clearInterval(gameInterval.current)
     if (tokenInterval.current) clearInterval(tokenInterval.current)
+    
+    // Lose life if game is lost
+    if (result === 'lost') {
+      const gameOver = loseLife(1, 'token-catcher')
+      if (gameOver) {
+        router.push('/')
+        return
+      }
+      // Update lives state
+      setLives(prev => Math.max(0, prev - 1))
+    }
   }
 
   const handleTokenClick = (tokenId: number) => {
@@ -138,40 +164,20 @@ export default function TokenCatcherGame() {
       if (token.type === 'btc') {
         if (isInBonusZone) {
           // Update balance immediately
-          setBalance(currentBalance => {
-            const newBalance = currentBalance + 100
-            console.log(`BTC clicked in bonus zone! Balance: ${currentBalance} -> ${newBalance}`)
-            return newBalance
-          })
-          // Show bonus message
-          setBonusAmount(100)
-          setShowBonusMessage(true)
-          setTimeout(() => setShowBonusMessage(false), 2000)
+          setBalance(currentBalance => currentBalance + 100)
+
         } else {
           // BTC clicked outside bonus zone - still give +50
-          setBalance(currentBalance => {
-            const newBalance = currentBalance + 50
-            console.log(`BTC clicked outside bonus zone! Balance: ${currentBalance} -> ${newBalance}`)
-            return newBalance
-          })
-          // Show bonus message for +50
-          setBonusAmount(50)
-          setShowBonusMessage(true)
-          setTimeout(() => setShowBonusMessage(false), 2000)
+          setBalance(currentBalance => currentBalance + 50)
+
         }
         // Bitcoin always disappears when clicked, regardless of position
       } else {
         // Other tokens can only be destroyed in the red zone
         if (!isInDestructionZone) {
-          console.log(`Other token clicked outside destruction zone at y=${token.y}`)
           return prev // Don't allow clicking outside red zone
         } else {
           // Token is in destruction zone - destroy without penalty
-          console.log(`${token.type.toUpperCase()} destroyed in SELL zone! No penalty.`)
-          // Show success message
-          setBonusAmount(0)
-          setShowBonusMessage(true)
-          setTimeout(() => setShowBonusMessage(false), 2000)
         }
       }
       
@@ -230,7 +236,7 @@ export default function TokenCatcherGame() {
   }
 
   const goToNextGame = () => {
-    localStorage.setItem('gameProgress', '6')
+    localStorage.setItem('gameProgress', '7')
     router.push('/game/elimination')
   }
 
@@ -289,9 +295,14 @@ export default function TokenCatcherGame() {
             </div>
           </div>
           <div className="text-white font-mono text-sm space-y-1">
-            <div className="flex items-center">
-              <span className="text-indigo-400 mr-2">🎯</span>
-              <span>Гра: <span className="text-indigo-400 font-bold">Токен Кетчер</span></span>
+            <div className="flex items-center space-x-1">
+              <span className="text-red-400 mr-2">❤️</span>
+              <span>Життя:</span>
+              {[1, 2, 3].map((life) => (
+                <span key={life} className="text-lg">
+                  {life <= lives ? '❤️' : '💔'}
+                </span>
+              ))}
             </div>
             <div className="flex items-center">
               <span className="text-green-400 mr-2">💰</span>
@@ -315,22 +326,11 @@ export default function TokenCatcherGame() {
           ref={setGameAreaRef}
           className="relative h-96 bg-black/30 border border-purple-500/40 rounded-none mb-8 overflow-hidden"
         >
-          {/* Bonus message overlay */}
-          {showBonusMessage && (
-            <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
-              <div className={`${bonusAmount > 0 ? 'bg-green-500/90' : bonusAmount < 0 ? 'bg-red-500/90' : 'bg-blue-500/90'} text-white font-bold text-2xl px-6 py-3 rounded-none animate-pulse`}>
-                {bonusAmount > 0 ? `+$${bonusAmount} BTC BONUS! 🎉` : bonusAmount < 0 ? `$${bonusAmount} TOKEN PENALTY! 💀` : `TOKEN DESTROYED! ✅`}
-              </div>
-            </div>
-          )}
+
           {/* Light green bonus zone in the middle */}
           <div className="absolute left-0 top-1/2 w-full h-8 bg-green-400/30 border-t-2 border-b-2 border-green-400/60 transform -translate-y-1/2">
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="text-white font-bold text-sm tracking-wider">BUY</span>
-            </div>
-            {/* Debug: Show zone coordinates */}
-            <div className="absolute top-0 left-0 text-xs text-green-300 bg-black/50 px-1">
-              46-54%
             </div>
           </div>
           
@@ -339,18 +339,9 @@ export default function TokenCatcherGame() {
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="text-white font-bold text-sm tracking-wider">SELL</span>
             </div>
-            {/* Debug: Show zone coordinates */}
-            <div className="absolute top-0 left-0 text-xs text-red-300 bg-black/50 px-1">
-              58-85%
-            </div>
           </div>
           
-          {/* Debug: Show where tokens are actually being clicked */}
-          <div className="absolute left-0 w-full h-1 bg-yellow-400/50" style={{ top: '76%' }}>
-            <div className="absolute top-0 left-0 text-xs text-yellow-300 bg-black/50 px-1">
-              Click zone: 76%
-            </div>
-          </div>
+
           
           {/* Falling tokens */}
           {tokens.map((token) => (
