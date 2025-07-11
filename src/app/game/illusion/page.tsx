@@ -144,7 +144,7 @@ export default function IllusionGame() {
 
   const goToNextGame = () => {
     localStorage.setItem('gameProgress', '3')
-    router.push('/game/test') // Temporary redirect
+    router.push('/game/memories') // Go to memories game
   }
 
   if (!isClient) {
