@@ -39,53 +39,164 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-blob animation-delay-4000"></div>
+    <div className="min-h-screen bg-black relative overflow-hidden">
+      {/* Enhanced crypto grid background */}
+      <div className="absolute inset-0 opacity-30">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `
+            linear-gradient(rgba(0, 255, 255, 0.15) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0, 255, 255, 0.15) 1px, transparent 1px)
+          `,
+          backgroundSize: '30px 30px'
+        }}></div>
       </div>
 
-      {/* Floating particles */}
-      <div className="absolute inset-0">
-        {[...Array(20)].map((_, i) => (
+      {/* Squid Game symbols background */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Triangle symbols */}
+        {[...Array(8)].map((_, i) => (
           <div
-            key={i}
-            className="absolute w-2 h-2 bg-white rounded-full opacity-20 animate-pulse"
+            key={`triangle-${i}`}
+            className="absolute text-cyan-400 opacity-10 animate-float"
             style={{
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`,
-              animationDuration: `${2 + Math.random() * 3}s`
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${10 + Math.random() * 5}s`
             }}
-          />
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L22 20H2L12 2Z"/>
+            </svg>
+          </div>
+        ))}
+        
+        {/* Circle symbols */}
+        {[...Array(6)].map((_, i) => (
+          <div
+            key={`circle-${i}`}
+            className="absolute text-purple-400 opacity-10 animate-float"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${8 + Math.random() * 4}s`
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <circle cx="12" cy="12" r="10"/>
+            </svg>
+          </div>
+        ))}
+        
+        {/* Square symbols */}
+        {[...Array(4)].map((_, i) => (
+          <div
+            key={`square-${i}`}
+            className="absolute text-pink-400 opacity-10 animate-float"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${12 + Math.random() * 3}s`
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <rect x="2" y="2" width="20" height="20"/>
+            </svg>
+          </div>
+        ))}
+      </div>
+
+      {/* Enhanced animated neon lines */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-1/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-pulse"></div>
+        <div className="absolute top-3/4 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent animate-pulse animation-delay-1000"></div>
+        <div className="absolute top-1/2 left-0 w-px h-full bg-gradient-to-b from-transparent via-pink-400 to-transparent animate-pulse animation-delay-2000"></div>
+        <div className="absolute top-1/2 right-0 w-px h-full bg-gradient-to-b from-transparent via-yellow-400 to-transparent animate-pulse animation-delay-3000"></div>
+        
+        {/* Diagonal lines */}
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-green-400 to-transparent animate-pulse animation-delay-1500 transform rotate-45 origin-left"></div>
+        <div className="absolute bottom-0 right-0 w-full h-px bg-gradient-to-r from-transparent via-orange-400 to-transparent animate-pulse animation-delay-2500 transform -rotate-45 origin-right"></div>
+      </div>
+
+      {/* Floating crypto symbols */}
+      <div className="absolute inset-0 pointer-events-none">
+        {[...Array(12)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute text-2xl opacity-15 animate-float"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 5}s`,
+              animationDuration: `${8 + Math.random() * 4}s`
+            }}
+          >
+            {['₿', 'Ξ', '◈', '◆', '◇', '○', '●'][Math.floor(Math.random() * 7)]}
+          </div>
         ))}
       </div>
 
       <div className="relative z-10 flex items-center justify-center min-h-screen p-4">
-        <Card className="w-full max-w-md backdrop-blur-lg bg-white/10 border-white/20 shadow-2xl">
-          <CardHeader className="text-center space-y-4">
+        <Card className="w-full max-w-sm backdrop-blur-md bg-black/90 border border-cyan-500/40 shadow-2xl shadow-cyan-500/30 relative overflow-hidden">
+          {/* Card background pattern */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute inset-0" style={{
+              backgroundImage: `
+                linear-gradient(45deg, transparent 40%, rgba(0, 255, 255, 0.1) 50%, transparent 60%),
+                linear-gradient(-45deg, transparent 40%, rgba(255, 0, 255, 0.1) 50%, transparent 60%)
+              `,
+              backgroundSize: '20px 20px'
+            }}></div>
+          </div>
+
+          <CardHeader className="text-center space-y-4 pb-6 relative z-10">
             <div className="relative">
-              <CardTitle className="text-4xl font-bold bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-pulse">
-                🦑 Crypto-Squid 🦑
-                Games 
+              <CardTitle className="text-3xl font-black bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent tracking-wider">
+                🦑 CRYPTO-SQUID 🦑
               </CardTitle>
-              <div className="absolute -inset-1 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 rounded-lg blur opacity-25 animate-pulse"></div>
+              <div className="text-2xl font-black bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent tracking-wider">
+                GAMES
+              </div>
+              <div className="absolute -inset-2 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 rounded-lg blur opacity-25 animate-pulse"></div>
             </div>
-            <CardDescription className="text-lg text-center font-bold text-white/80">
-              <span className="text-yellow-500">Вітаємо в підводному блокчейні на виживання!</span> <br/>
+            
+            {/* Squid Game symbols around title */}
+            <div className="flex justify-center items-center space-x-4 mt-4">
+              <div className="text-cyan-400 animate-pulse">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L22 20H2L12 2Z"/>
+                </svg>
+              </div>
+              <div className="text-purple-400 animate-pulse animation-delay-1000">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="12" r="10"/>
+                </svg>
+              </div>
+              <div className="text-pink-400 animate-pulse animation-delay-2000">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                  <rect x="2" y="2" width="20" height="20"/>
+                </svg>
+              </div>
+            </div>
+
+            <CardDescription className="text-sm text-center font-medium text-gray-300 leading-relaxed">
+              <span className="text-yellow-400 font-bold">Вітаємо в підводному блокчейні на виживання!</span> <br/>
               Тут тебе чекають неймовірні скарби, але також і підступні небезпеки<br/>
               Щоб вижити, ти повинен бути швидкий, розумний і вміти користуватися технологіями.<br/>
-             <span className="text-yellow-500">Удачі!</span>
+              <span className="text-yellow-400 font-bold">Удачі!</span>
             </CardDescription>
           </CardHeader>
           
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-6 relative z-10">
             {!savedNickname ? (
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="nickname" className="text-white font-semibold">
+                <div className="space-y-3">
+                  <Label htmlFor="nickname" className="text-cyan-400 font-bold text-sm uppercase tracking-wider flex items-center">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" className="mr-2">
+                      <path d="M12 2L22 20H2L12 2Z"/>
+                    </svg>
                     Write your nickname:
                   </Label>
                   <Input
@@ -93,82 +204,74 @@ export default function Home() {
                     type="text"
                     placeholder="Enter your squid nickname..."
                     value={nickname}
-                    onChange={(e) => setNickname(e.target.value)}
+                    onChange={(e) => setNickname(e.target.value.toLowerCase())}
                     onKeyPress={handleKeyPress}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white/50 focus:border-cyan-400 focus:ring-cyan-400"
+                    className="bg-black/60 border-cyan-500/60 text-white placeholder:text-gray-500 focus:border-cyan-400 focus:ring-cyan-400/30 font-mono text-sm backdrop-blur-sm"
                   />
                 </div>
                 <Button
                   onClick={handleSaveNickname}
                   disabled={!nickname.trim() || isLoading}
-                  className="w-full bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white font-bold py-3 px-6 rounded-none border border-cyan-400/60 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-cyan-500/30 relative overflow-hidden group"
                 >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
                   {isLoading ? (
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center justify-center space-x-2 relative z-10">
                       <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span>Saving...</span>
+                      <span className="font-mono">SAVING...</span>
                     </div>
                   ) : (
-                    'Join the Adventure! 🚀'
+                    <span className="font-mono tracking-wider relative z-10">JOIN THE GAME 🚀</span>
                   )}
                 </Button>
               </div>
             ) : (
               <div className="text-center space-y-4">
-                <div className="p-4 bg-gradient-to-r from-green-500/20 to-blue-500/20 rounded-lg border border-green-400/30">
-                  <p className="text-white font-semibold">
-                    Welcome back, <span className="text-cyan-400 font-bold">{savedNickname}</span>! 🎉
+                <div className="p-4 bg-gradient-to-r from-green-600/30 to-cyan-600/30 rounded-none border border-green-400/40 backdrop-blur-sm">
+                  <p className="text-white font-bold text-sm">
+                    Welcome back, <span className="text-cyan-400 font-black uppercase tracking-wider">{savedNickname}</span>! 🎉
                   </p>
                 </div>
-                <Button
-                  onClick={() => {
-                    localStorage.removeItem('nickname')
-                    setSavedNickname('')
-                  }}
-                  variant="outline"
-                  className="border-white/20 text-black hover:bg-white/10 cursor-pointer"
-                >
-                  Change Nickname
-                </Button>
-                <Button
-                  onClick={() => {
-                    localStorage.removeItem('nickname')
-                    setSavedNickname('')
-                  }}
-                  variant="default"
-                  className="ml-4 border-white/20 text-black hover:bg-white/10 cursor-pointer"
-                >
-                  🚀
-                </Button>
+                <div className="flex space-x-2">
+                  <Button
+                    onClick={() => {
+                      localStorage.removeItem('nickname')
+                      setSavedNickname('')
+                    }}
+                    variant="outline"
+                    className="flex-1 border-cyan-500/60 text-cyan-400 hover:bg-cyan-500/20 font-mono text-xs uppercase tracking-wider rounded-none backdrop-blur-sm"
+                  >
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="mr-1">
+                      <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    Change
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      // Add game start logic here
+                    }}
+                    className="flex-1 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white font-bold font-mono text-xs uppercase tracking-wider rounded-none border border-yellow-400/60 shadow-lg shadow-yellow-500/25"
+                  >
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor" className="mr-1">
+                      <rect x="2" y="2" width="20" height="20"/>
+                    </svg>
+                    🚀 Start
+                  </Button>
+                </div>
               </div>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Bottom wave effect */}
-      <div className="absolute bottom-0 left-0 right-0">
-        <svg
-          className="w-full h-20"
-          viewBox="0 0 1200 120"
-          preserveAspectRatio="none"
-        >
-          <path
-            d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z"
-            opacity=".25"
-            className="fill-current text-white/10"
-          ></path>
-          <path
-            d="M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z"
-            opacity=".5"
-            className="fill-current text-white/20"
-          ></path>
-          <path
-            d="M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z"
-            className="fill-current text-white/30"
-          ></path>
-        </svg>
-      </div>
+      {/* Enhanced bottom scan line effect */}
+      <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-pulse"></div>
+      
+      {/* Corner decorations */}
+      <div className="absolute top-4 left-4 w-8 h-8 border-l-2 border-t-2 border-cyan-400 opacity-60"></div>
+      <div className="absolute top-4 right-4 w-8 h-8 border-r-2 border-t-2 border-purple-400 opacity-60"></div>
+      <div className="absolute bottom-4 left-4 w-8 h-8 border-l-2 border-b-2 border-pink-400 opacity-60"></div>
+      <div className="absolute bottom-4 right-4 w-8 h-8 border-r-2 border-b-2 border-yellow-400 opacity-60"></div>
     </div>
   )
 }
