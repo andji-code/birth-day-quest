@@ -118,7 +118,7 @@ export default function Home() {
         {/* Diagonal lines */}
         <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-green-400 to-transparent animate-pulse animation-delay-1500 transform rotate-45 origin-left"></div>
         <div className="absolute bottom-0 right-0 w-full h-px bg-gradient-to-r from-transparent via-orange-400 to-transparent animate-pulse animation-delay-2500 transform -rotate-45 origin-right"></div>
-      </div>
+        </div>
 
       {/* Floating crypto symbols */}
       <div className="absolute inset-0 pointer-events-none">
