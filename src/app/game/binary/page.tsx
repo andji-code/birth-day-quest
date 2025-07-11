@@ -246,7 +246,7 @@ export default function BinaryGame() {
 
   const goToNextGame = () => {
     localStorage.setItem('gameProgress', '6')
-    router.push('/game/test') // Temporary redirect
+    router.push('/game/elimination')
   }
 
   if (!isClient) {

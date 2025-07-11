@@ -22,6 +22,8 @@ export default function TokenCatcherGame() {
   const [balance, setBalance] = useState(500)
   const [gameTime, setGameTime] = useState(0)
   const [gameAreaRef, setGameAreaRef] = useState<HTMLDivElement | null>(null)
+  const [showBonusMessage, setShowBonusMessage] = useState(false)
+  const [bonusAmount, setBonusAmount] = useState(0)
 
   const [nickname, setNickname] = useState('')
   const router = useRouter()
@@ -120,22 +122,56 @@ export default function TokenCatcherGame() {
       const token = prev.find(t => t.id === tokenId)
       if (!token || token.isClicked) return prev
       
-      // Check if token is in the bonus zone (middle area)
-      const isInBonusZone = token.y >= 45 && token.y <= 55 // 45% to 55% of screen height
+      // Check if token is in the bonus zone (green BUY zone - center area)
+      // The green zone is positioned at top-1/2 with h-8, so it's roughly 46% to 54% of screen height
+      const isInBonusZone = token.y >= 46 && token.y <= 54
       
-      // Check if token is in the destruction zone (red area)
-      const isInDestructionZone = token.y >= 65 && token.y <= 75 // 65% to 75% of screen height
+      // Check if token is in the destruction zone (red SELL zone - below green zone)
+      // The red zone is positioned at top-1/2 with translate-y-12 (48px down from center)
+      // In a 384px container, 48px = 12.5%, so the zone is roughly 62.5% down from top
+      // With h-8 (32px = 8.33%), the zone covers roughly 58.33% to 66.67%
+      const isInDestructionZone = token.y >= 58 && token.y <= 85
+      
+
       
       // Update balance based on token type and position
       if (token.type === 'btc') {
         if (isInBonusZone) {
-          setBalance(prevBalance => prevBalance + 50)
+          // Update balance immediately
+          setBalance(currentBalance => {
+            const newBalance = currentBalance + 100
+            console.log(`BTC clicked in bonus zone! Balance: ${currentBalance} -> ${newBalance}`)
+            return newBalance
+          })
+          // Show bonus message
+          setBonusAmount(100)
+          setShowBonusMessage(true)
+          setTimeout(() => setShowBonusMessage(false), 2000)
+        } else {
+          // BTC clicked outside bonus zone - still give +50
+          setBalance(currentBalance => {
+            const newBalance = currentBalance + 50
+            console.log(`BTC clicked outside bonus zone! Balance: ${currentBalance} -> ${newBalance}`)
+            return newBalance
+          })
+          // Show bonus message for +50
+          setBonusAmount(50)
+          setShowBonusMessage(true)
+          setTimeout(() => setShowBonusMessage(false), 2000)
         }
         // Bitcoin always disappears when clicked, regardless of position
       } else {
         // Other tokens can only be destroyed in the red zone
         if (!isInDestructionZone) {
+          console.log(`Other token clicked outside destruction zone at y=${token.y}`)
           return prev // Don't allow clicking outside red zone
+        } else {
+          // Token is in destruction zone - destroy without penalty
+          console.log(`${token.type.toUpperCase()} destroyed in SELL zone! No penalty.`)
+          // Show success message
+          setBonusAmount(0)
+          setShowBonusMessage(true)
+          setTimeout(() => setShowBonusMessage(false), 2000)
         }
       }
       
@@ -195,7 +231,7 @@ export default function TokenCatcherGame() {
 
   const goToNextGame = () => {
     localStorage.setItem('gameProgress', '6')
-    router.push('/game/test') // Temporary redirect
+    router.push('/game/elimination')
   }
 
   if (!isClient) {
@@ -270,7 +306,7 @@ export default function TokenCatcherGame() {
             🎯 ТОКЕН КЕТЧЕР 🎯
           </h1>
           <p className="text-gray-400 text-sm max-w-2xl mx-auto">
-            Клікай по всіх токенах крім BTC! BTC = +$50, інші токени = -$100. Дійди до $1000!
+            Клікай по всіх токенах крім BTC! BTC в зоні BUY = +$100, BTC поза зоною = +$50, інші токени в зоні SELL = знищення без штрафу. Дійди до $1000!
           </p>
         </div>
 
@@ -279,10 +315,22 @@ export default function TokenCatcherGame() {
           ref={setGameAreaRef}
           className="relative h-96 bg-black/30 border border-purple-500/40 rounded-none mb-8 overflow-hidden"
         >
+          {/* Bonus message overlay */}
+          {showBonusMessage && (
+            <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
+              <div className={`${bonusAmount > 0 ? 'bg-green-500/90' : bonusAmount < 0 ? 'bg-red-500/90' : 'bg-blue-500/90'} text-white font-bold text-2xl px-6 py-3 rounded-none animate-pulse`}>
+                {bonusAmount > 0 ? `+$${bonusAmount} BTC BONUS! 🎉` : bonusAmount < 0 ? `$${bonusAmount} TOKEN PENALTY! 💀` : `TOKEN DESTROYED! ✅`}
+              </div>
+            </div>
+          )}
           {/* Light green bonus zone in the middle */}
           <div className="absolute left-0 top-1/2 w-full h-8 bg-green-400/30 border-t-2 border-b-2 border-green-400/60 transform -translate-y-1/2">
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="text-white font-bold text-sm tracking-wider">BUY</span>
+            </div>
+            {/* Debug: Show zone coordinates */}
+            <div className="absolute top-0 left-0 text-xs text-green-300 bg-black/50 px-1">
+              46-54%
             </div>
           </div>
           
@@ -290,6 +338,17 @@ export default function TokenCatcherGame() {
           <div className="absolute left-0 top-1/2 w-full h-8 bg-red-400/30 border-t-2 border-b-2 border-red-400/60 transform translate-y-12">
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="text-white font-bold text-sm tracking-wider">SELL</span>
+            </div>
+            {/* Debug: Show zone coordinates */}
+            <div className="absolute top-0 left-0 text-xs text-red-300 bg-black/50 px-1">
+              58-85%
+            </div>
+          </div>
+          
+          {/* Debug: Show where tokens are actually being clicked */}
+          <div className="absolute left-0 w-full h-1 bg-yellow-400/50" style={{ top: '76%' }}>
+            <div className="absolute top-0 left-0 text-xs text-yellow-300 bg-black/50 px-1">
+              Click zone: 76%
             </div>
           </div>
           
@@ -308,14 +367,22 @@ export default function TokenCatcherGame() {
                 e.preventDefault()
                 e.stopPropagation()
               }}
-              className={`absolute cursor-pointer transition-all duration-200 z-10 ${
+              onTouchStart={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                if (!token.isClicked) {
+                  handleTokenClick(token.id)
+                }
+              }}
+              className={`absolute cursor-pointer transition-all duration-200 z-20 ${
                 token.isClicked ? 'opacity-0 scale-0 pointer-events-none' : 'opacity-100 scale-100'
               } hover:scale-125 active:scale-95`}
               style={{
                 left: `${token.x}%`,
                 top: `${token.y}%`,
                 transform: `translate(-50%, -50%) ${token.isClicked ? 'scale(0)' : ''}`,
-                pointerEvents: token.isClicked ? 'none' : 'auto'
+                pointerEvents: token.isClicked ? 'none' : 'auto',
+                touchAction: 'manipulation'
               }}
             >
               <img
@@ -323,6 +390,10 @@ export default function TokenCatcherGame() {
                 alt={tokenNames[token.type]}
                 className="w-12 h-12 select-none pointer-events-none"
                 draggable={false}
+                onError={(e) => {
+                  // Fallback for broken images
+                  e.currentTarget.style.display = 'none'
+                }}
               />
             </div>
           ))}

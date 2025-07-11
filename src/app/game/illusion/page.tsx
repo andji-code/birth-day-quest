@@ -144,7 +144,7 @@ export default function IllusionGame() {
 
   const goToNextGame = () => {
     localStorage.setItem('gameProgress', '3')
-    router.push('/game/memories') // Go to memories game
+    router.push('/game/elimination')
   }
 
   if (!isClient) {

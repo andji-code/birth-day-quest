@@ -95,7 +95,7 @@ export default function GreenLightGame() {
   const goToNextGame = () => {
     // Save progress and go to next game
     localStorage.setItem('gameProgress', '1')
-    router.push('/game/glass-bridge')
+    router.push('/game/elimination')
   }
 
   useEffect(() => {

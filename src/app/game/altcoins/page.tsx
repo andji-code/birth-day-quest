@@ -91,7 +91,7 @@ export default function AltcoinsGame() {
 
   const goToNextGame = () => {
     localStorage.setItem('gameProgress', '5')
-    router.push('/game/token-catcher') // Go to token catcher game
+    router.push('/game/elimination')
   }
 
   const getPriceColor = (price: number) => {

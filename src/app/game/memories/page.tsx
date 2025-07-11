@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useRouter } from 'next/navigation'
 
 export default function MemoriesGame() {
   const [gameState, setGameState] = useState<'waiting' | 'playing' | 'won' | 'lost'>('waiting')
@@ -17,6 +18,7 @@ export default function MemoriesGame() {
   const [score, setScore] = useState(0)
   const [timeLeft, setTimeLeft] = useState(60)
   const gameInterval = useRef<NodeJS.Timeout | null>(null)
+  const router = useRouter()
 
   // Correct answers for memory test
   const correctAnswers = ['курка', 'петух', 'скаймаг', 'skywrath mage', 'skywrath']
@@ -259,7 +261,8 @@ export default function MemoriesGame() {
                 </Button>
                 <Button
                   onClick={() => {
-                    window.location.href = '/game/altcoins'
+                    localStorage.setItem('gameProgress', '4')
+                    router.push('/game/elimination')
                   }}
                   className="flex-1 bg-gradient-to-r from-green-600 to-cyan-600 hover:from-green-500 hover:to-cyan-500 text-white font-bold font-mono text-sm uppercase tracking-wider rounded-none border border-green-400/60 py-4"
                 >
