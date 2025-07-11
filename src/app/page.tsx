@@ -110,7 +110,7 @@ export default function Home() {
                     </div>
                   ) : (
                     'Join the Adventure! 🚀'
-                  )}s
+                  )}
                 </Button>
               </div>
             ) : (
