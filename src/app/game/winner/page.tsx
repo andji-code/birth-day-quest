@@ -4,12 +4,18 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
+import forge from 'node-forge'
+import QRCode from 'qrcode'
 
 export default function WinnerScreen() {
   const [isClient, setIsClient] = useState(false)
   const [nickname, setNickname] = useState('')
   const [totalWinnings, setTotalWinnings] = useState(0)
   const [particles, setParticles] = useState<Array<{id: number, left: number, top: number, delay: number, duration: number}>>([])
+  const [decryptedPrize, setDecryptedPrize] = useState('')
+  const [qrCodeDataUrl, setQrCodeDataUrl] = useState('')
+  const [isDecrypting, setIsDecrypting] = useState(false)
+  const [showPrize, setShowPrize] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -36,6 +42,69 @@ export default function WinnerScreen() {
       setTotalWinnings(parseInt(winnings))
     }
   }, [])
+
+  const decryptPrize = async () => {
+    setIsDecrypting(true)
+    
+    try {
+      // The encrypted string from OpenSSL
+      const encryptedBase64 = "U2FsdGVkX1804wRbzBzKfmJ5L919lA1AuOpBoiIfRusPibVTMhWAoX6OKqioimlwrAm4lh79NNXODN4NoGm+1pDW/WHUeMqFE0a/362BoyIdv0udpkLP5OR1u52pvy+FVHEFRQo91/C1EitU64H3MQ=="
+      
+      // PBKDF2 for OpenSSL -pbkdf2 compatibility
+      function pbkdf2KeyIV(password: string, salt: string) {
+        // 32 bytes for key, 16 bytes for IV
+        const keyiv = forge.pkcs5.pbkdf2(password, salt, 10000, 48, forge.md.sha256.create())
+        return {
+          key: keyiv.substring(0, 32),
+          iv: keyiv.substring(32, 48)
+        }
+      }
+
+      // Decode base64 to get raw bytes string
+      const encryptedRaw = forge.util.decode64(encryptedBase64)
+      // Check header
+      const saltHeader = "Salted__"
+      if (encryptedRaw.slice(0, 8) !== saltHeader) {
+        throw new Error('Invalid encrypted data format')
+      }
+      const salt = encryptedRaw.slice(8, 16)
+      const encryptedData = encryptedRaw.slice(16)
+      // Derive key and IV using PBKDF2 (OpenSSL -pbkdf2)
+      const { key, iv } = pbkdf2KeyIV(nickname, salt)
+      // Create decipher
+      const decipher = forge.cipher.createDecipher('AES-CBC', key)
+      decipher.start({ iv })
+      decipher.update(forge.util.createBuffer(encryptedData, 'raw'))
+      if (!decipher.finish()) {
+        throw new Error('Decryption failed')
+      }
+      const decryptedText = decipher.output.toString()
+      
+      // Create prize message with decrypted content
+      const prizeMessage = decryptedText
+
+      setDecryptedPrize(prizeMessage)
+      
+      // Generate QR code
+      const qrCodeDataUrl = await QRCode.toDataURL(prizeMessage)
+      setQrCodeDataUrl(qrCodeDataUrl)
+      setShowPrize(true)
+    } catch (error) {
+      console.error('Decryption error:', error)
+      setDecryptedPrize(`Помилка дешифрування. Перевірте, чи правильно введено нікнейм: ${nickname}`)
+    } finally {
+      setIsDecrypting(false)
+    }
+  }
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(decryptedPrize)
+      alert('Скопійовано в буфер обміну!')
+    } catch (error) {
+      console.error('Copy error:', error)
+    }
+  }
 
   const goToHome = () => {
     // Reset game progress but keep lives
@@ -125,9 +194,8 @@ export default function WinnerScreen() {
 
         {/* Winner Title */}
         <div className="text-center mb-8">
-          <h1 className="text-6xl font-black bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent tracking-wider mb-4 relative">
-            <span className="relative z-10">👑 ПЕРЕМОЖЕЦЬ 👑</span>
-            <div className="absolute -inset-4 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 rounded-lg blur opacity-25 animate-pulse"></div>
+          <h1 className="text-6xl font-black bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent tracking-wider mb-4">
+            👑 ПЕРЕМОЖЕЦЬ 👑
           </h1>
           <p className="text-cyan-400 text-lg font-mono tracking-wider mb-2">
             ТИ ПРОЙШОВ ВСІ ІГРИ КРИПТО-СКВІД ГЕЙМС!
@@ -181,13 +249,46 @@ export default function WinnerScreen() {
                 </p>
               </div>
               
-              <Button
-                onClick={goToHome}
-                className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white font-bold py-4 px-8 rounded-none border border-yellow-400/60 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-yellow-500/30 relative overflow-hidden group"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                <span className="font-mono tracking-wider relative z-10 text-lg">🏠 ПОВЕРНУТИСЯ ДОДОМУ</span>
-              </Button>
+              {!showPrize ? (
+                <Button
+                  onClick={decryptPrize}
+                  disabled={isDecrypting}
+                  className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white font-bold py-4 px-8 rounded-none border border-yellow-400/60 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-yellow-500/30 relative overflow-hidden group disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                  <span className="font-mono tracking-wider relative z-10 text-lg">
+                    {isDecrypting ? '🔓 ДЕШИФРУЄМО...' : '🎁 ОТРИМАТИ ПРИЗ'}
+                  </span>
+                </Button>
+              ) : (
+                <div className="space-y-4">
+                  <div className="p-4 bg-gradient-to-r from-green-600/30 to-cyan-600/30 rounded-none border border-green-400/40 backdrop-blur-sm">
+                    <p className="text-white font-bold text-lg mb-2">🎉 ТВІЙ ПРИЗ: Seed Phrase</p>
+                    <p className="text-green-400 font-mono text-sm break-all">{decryptedPrize}</p>
+                  </div>
+                  
+                  {qrCodeDataUrl && (
+                    <div className="flex justify-center">
+                      <img src={qrCodeDataUrl} alt="QR Code" className="w-48 h-48 border-2 border-green-400/60" />
+                    </div>
+                  )}
+                  
+                  <div className="flex space-x-2">
+                    <Button
+                      onClick={copyToClipboard}
+                      className="flex-1 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-bold py-3 px-6 rounded-none border border-cyan-400/60 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-cyan-500/30"
+                    >
+                      <span className="font-mono tracking-wider">📋 КОПІЮВАТИ</span>
+                    </Button>
+                    <Button
+                      onClick={goToHome}
+                      className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold py-3 px-6 rounded-none border border-purple-400/60 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-purple-500/30"
+                    >
+                      <span className="font-mono tracking-wider">🏠 ДОДОМУ</span>
+                    </Button>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
