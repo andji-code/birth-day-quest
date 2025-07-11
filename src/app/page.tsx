@@ -248,7 +248,7 @@ export default function Home() {
                   </Button>
                   <Button
                     onClick={() => {
-                      // Add game start logic here
+                      window.location.href = '/intro'
                     }}
                     className="flex-1 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white font-bold font-mono text-xs uppercase tracking-wider rounded-none border border-yellow-400/60 shadow-lg shadow-yellow-500/25"
                   >
