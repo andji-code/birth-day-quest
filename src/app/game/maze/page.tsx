@@ -98,7 +98,7 @@ export default function MazeGame() {
     
     // Mark game as completed
     localStorage.setItem('gameProgress', '8')
-    router.push('/game/elimination/')
+    router.push('/birth-day-quest/game/elimination/')
   }
 
   // Функції керування свайпами та клавішами

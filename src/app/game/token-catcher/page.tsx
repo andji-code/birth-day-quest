@@ -213,7 +213,7 @@ export default function TokenCatcherGame() {
 
   const goToNextGame = () => {
     localStorage.setItem('gameProgress', '7')
-    router.push('/game/elimination/')
+    router.push('/birth-day-quest/game/elimination/')
   }
 
   if (!isClient) {

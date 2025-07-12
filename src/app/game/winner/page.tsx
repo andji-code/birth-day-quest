@@ -113,7 +113,7 @@ export default function WinnerScreen() {
     localStorage.removeItem('eliminatedPlayers')
     localStorage.removeItem('eliminationUsed')
     localStorage.removeItem('eliminationOrder')
-    router.push('/')
+    router.push('/birth-day-quest/')
   }
 
   if (!isClient) {
