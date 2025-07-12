@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { checkGameOver } from '@/lib/lives'
 
 export default function Home() {
   const [nickname, setNickname] = useState('')
@@ -14,12 +13,6 @@ export default function Home() {
   const [gameOver, setGameOver] = useState(false)
 
   useEffect(() => {
-    // Check if game is over
-    if (checkGameOver()) {
-      setGameOver(true)
-      return
-    }
-
     // Load nickname from localStorage on component mount
     const saved = localStorage.getItem('nickname')
     if (saved) {
@@ -175,7 +168,7 @@ export default function Home() {
               </div>
               <Button
                 onClick={() => {
-                  localStorage.removeItem('playerLives')
+
                   setGameOver(false)
                 }}
                 className="w-full bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 text-white font-bold py-3 px-6 rounded-none border border-red-400/60 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-red-500/30"
@@ -291,22 +284,16 @@ export default function Home() {
                 <div className="flex space-x-2">
                   <Button
                     onClick={() => {
-                      // Save the game over year, player lives, and failed games if they exist
+                      // Save the game over year and failed games if they exist
                       const gameOverYear = localStorage.getItem('gameOverYear')
-                      const playerLives = localStorage.getItem('playerLives')
                       const failedGames = localStorage.getItem('failedGames')
                       
-                      // Clear all localStorage except game over year, player lives, and failed games
+                      // Clear all localStorage except game over year and failed games
                       localStorage.clear()
                       
                       // Restore game over year if it existed
                       if (gameOverYear) {
                         localStorage.setItem('gameOverYear', gameOverYear)
-                      }
-                      
-                      // Restore player lives if they existed
-                      if (playerLives) {
-                        localStorage.setItem('playerLives', playerLives)
                       }
                       
                       // Restore failed games if they existed
@@ -326,12 +313,6 @@ export default function Home() {
                   </Button>
                   <Button
                     onClick={() => {
-                      // Check if game is over before starting
-                      if (checkGameOver()) {
-                        setGameOver(true)
-                        return
-                      }
-                      
                       // Clear eliminated players and game progress when starting a new game
                       localStorage.removeItem('eliminatedPlayers')
                       localStorage.removeItem('eliminationUsed')

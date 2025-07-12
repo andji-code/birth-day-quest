@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
-import { loseLife, checkGameOver, getBaseLives, getDisplayLives } from '@/lib/lives'
+
 
 interface Token {
   id: number
@@ -23,7 +23,7 @@ export default function TokenCatcherGame() {
   const [balance, setBalance] = useState(500)
   const [gameTime, setGameTime] = useState(0)
   const [gameAreaRef, setGameAreaRef] = useState<HTMLDivElement | null>(null)
-  const [lives, setLives] = useState(3)
+
 
 
   const [nickname, setNickname] = useState('')
@@ -52,12 +52,6 @@ export default function TokenCatcherGame() {
   useEffect(() => {
     setIsClient(true)
     
-    // Check if game is over
-    if (checkGameOver()) {
-      router.push('/')
-      return
-    }
-    
     const saved = localStorage.getItem('nickname')
     if (saved) {
       setNickname(saved)
@@ -72,9 +66,6 @@ export default function TokenCatcherGame() {
       duration: 8 + Math.random() * 4
     }))
     setParticles(generatedParticles)
-
-    // Load player lives (base lives only, bonus HP is shown separately)
-    setLives(getBaseLives(1)) // Player ID 1 for Валентин
   }, [router])
 
   const startGame = () => {
@@ -126,17 +117,6 @@ export default function TokenCatcherGame() {
     setGameState(result)
     if (gameInterval.current) clearInterval(gameInterval.current)
     if (tokenInterval.current) clearInterval(tokenInterval.current)
-    
-    // Lose life if game is lost
-    if (result === 'lost') {
-      const gameOver = loseLife(1, 'token-catcher')
-      if (gameOver) {
-        router.push('/')
-        return
-      }
-      // Update lives state with base lives only
-      setLives(getBaseLives(1))
-    }
   }
 
   const handleTokenClick = (tokenId: number) => {
@@ -232,7 +212,7 @@ export default function TokenCatcherGame() {
   }
 
   const goToNextGame = () => {
-    localStorage.setItem('gameProgress', '7')
+    localStorage.setItem('gameProgress', '8')
     router.push('/game/elimination')
   }
 
@@ -291,18 +271,7 @@ export default function TokenCatcherGame() {
             </div>
           </div>
           <div className="text-white font-mono text-sm space-y-1">
-            <div className="flex items-center space-x-1">
-              <span className="text-red-400 mr-2">❤️</span>
-              <span>Життя:</span>
-              {[...Array(lives)].map((_, index) => (
-                <span key={index} className="text-lg">
-                  ❤️
-                </span>
-              ))}
-            </div>
-            <div className="text-xs text-yellow-400">
-              Бонус: +{Math.max(0, getDisplayLives(1) - lives)} HP
-            </div>
+
             <div className="flex items-center">
               <span className="text-green-400 mr-2">💰</span>
               <span>Баланс: <span className="text-green-400 font-bold">${balance}</span></span>

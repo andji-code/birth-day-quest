@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
-import { checkGameOver, loseLife, getBaseLives, getDisplayLives } from '@/lib/lives'
 
 export default function AltcoinsGame() {
   const [gameState, setGameState] = useState<'waiting' | 'playing' | 'won' | 'lost'>('waiting')
@@ -16,26 +15,17 @@ export default function AltcoinsGame() {
 
   const [nickname, setNickname] = useState('')
   const [score, setScore] = useState(0)
-  const [lives, setLives] = useState(3)
+
   const router = useRouter()
   const gameInterval = useRef<NodeJS.Timeout | null>(null)
   const priceInterval = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    // Check if game is over
-    if (checkGameOver()) {
-      window.location.href = '/'
-      return
-    }
-
     setIsClient(true)
     const saved = localStorage.getItem('nickname')
     if (saved) {
       setNickname(saved)
     }
-    
-    // Load player lives (base lives only, bonus HP is shown separately)
-    setLives(getBaseLives(1)) // Player ID 1 for Валентин
     
     // Generate particles on client side only
     const generatedParticles = Array.from({ length: 30 }, (_, i) => ({
@@ -73,16 +63,6 @@ export default function AltcoinsGame() {
     setGameState(result)
     if (gameInterval.current) clearInterval(gameInterval.current)
     if (priceInterval.current) clearInterval(priceInterval.current)
-    
-    if (result === 'lost') {
-      const gameOver = loseLife(1, 'altcoins')
-      if (gameOver) {
-        router.push('/')
-        return
-      }
-      // Update lives state with base lives only
-      setLives(getBaseLives(1))
-    }
   }
 
   const handleBuyClick = () => {
@@ -109,12 +89,11 @@ export default function AltcoinsGame() {
     setCurrentPrice(0)
     setWaitTime(0)
     
-    // Reload lives from localStorage (base lives only)
-    setLives(getBaseLives(1))
+
   }
 
   const goToNextGame = () => {
-    localStorage.setItem('gameProgress', '5')
+    localStorage.setItem('gameProgress', '6')
     router.push('/game/elimination')
   }
 
@@ -188,13 +167,7 @@ export default function AltcoinsGame() {
             </div>
           </div>
           <div className="text-white font-mono text-sm space-y-1">
-            <div className="flex items-center">
-              <span className="text-red-400 mr-2">❤️</span>
-              <span>Життя: <span className="text-red-400 font-bold">{'❤️'.repeat(lives)}</span></span>
-            </div>
-            <div className="text-xs text-yellow-400">
-              Бонус: +{Math.max(0, getDisplayLives(1) - lives)} HP
-            </div>
+
             <div className="flex items-center">
               <span className="text-cyan-400 mr-2">🏆</span>
               <span>Рахунок: <span className="text-cyan-400 font-bold">{score}</span></span>

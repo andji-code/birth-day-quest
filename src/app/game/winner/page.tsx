@@ -107,7 +107,7 @@ export default function WinnerScreen() {
   }
 
   const goToHome = () => {
-    // Reset game progress but keep lives
+    // Reset game progress
     localStorage.removeItem('gameProgress')
     localStorage.removeItem('totalWinnings')
     localStorage.removeItem('eliminatedPlayers')

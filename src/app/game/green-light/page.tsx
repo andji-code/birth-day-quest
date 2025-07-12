@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
-import { loseLife, checkGameOver, getBaseLives, getDisplayLives } from '@/lib/lives'
+
 
 export default function GreenLightGame() {
   const [gameState, setGameState] = useState<'waiting' | 'playing' | 'won' | 'lost'>('waiting')
@@ -14,7 +14,7 @@ export default function GreenLightGame() {
   const [score, setScore] = useState(0)
   const [nickname, setNickname] = useState('')
   const [lightIntensity, setLightIntensity] = useState(0)
-  const [lives, setLives] = useState(3)
+
   const [lastMoveTime, setLastMoveTime] = useState(0)
   const router = useRouter()
   const gameInterval = useRef<NodeJS.Timeout | null>(null)
@@ -22,19 +22,10 @@ export default function GreenLightGame() {
   const intensityInterval = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    // Check if game is over
-    if (checkGameOver()) {
-      router.push('/')
-      return
-    }
-
     const saved = localStorage.getItem('nickname')
     if (saved) {
       setNickname(saved)
     }
-
-    // Load player lives (base lives only, bonus HP is shown separately)
-    setLives(getBaseLives(1)) // Player ID 1 for Валентин
   }, [router])
 
   const startGame = () => {
@@ -57,7 +48,7 @@ export default function GreenLightGame() {
     gameInterval.current = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
-          endGame('won')
+          endGame('lost')
           return 0
         }
         return prev - 1
@@ -75,17 +66,6 @@ export default function GreenLightGame() {
     if (lightInterval.current) clearTimeout(lightInterval.current)
     if (gameInterval.current) clearInterval(gameInterval.current)
     if (intensityInterval.current) clearInterval(intensityInterval.current)
-    
-    // Lose life if game is lost
-    if (result === 'lost') {
-      const gameOver = loseLife(1, 'green-light')
-      if (gameOver) {
-        router.push('/')
-        return
-      }
-      // Update lives state with base lives only
-      setLives(getBaseLives(1))
-    }
   }
 
   const handleMove = () => {
@@ -100,16 +80,16 @@ export default function GreenLightGame() {
     }
     
     if (isGreenLight) {
-      // Correct move - advance player by 3% (3x movement)
+      // Correct move - advance player by 5% (faster movement)
       setPlayerPosition(prev => {
-        const newPosition = prev + 3
+        const newPosition = prev + 5
         if (newPosition >= 100) {
           endGame('won')
           return 100
         }
         return newPosition
       })
-      setScore(prev => prev + 3)
+      setScore(prev => prev + 5)
       setLastMoveTime(now)
     } else {
       // Wrong move - game over
@@ -176,17 +156,7 @@ export default function GreenLightGame() {
           <div className="text-white font-mono text-sm">
             <div>Позиція: <span className="text-green-400 font-bold">{playerPosition}%</span></div>
             <div>Рахунок: <span className="text-purple-400 font-bold">{score}</span></div>
-            <div className="flex items-center space-x-1">
-              <span>Життя:</span>
-              {[...Array(lives)].map((_, index) => (
-                <span key={index} className="text-lg">
-                  ❤️
-                </span>
-              ))}
-            </div>
-            <div className="text-xs text-yellow-400">
-              Бонус: +{Math.max(0, getDisplayLives(1) - lives)} HP
-            </div>
+
           </div>
         </div>
 
@@ -196,7 +166,7 @@ export default function GreenLightGame() {
             🟢 ЗЕЛЕНЕ-СВІТЛО / ЧЕРВОНЕ-СВІТЛО 🔴
           </h1>
           <p className="text-gray-400 text-sm mt-2">
-            Натискай "РУХ" тільки під час зеленого світла! Максимум 1 рух в секунду.
+            Натискай "РУХ" тільки під час зеленого світла! Максимум 1 рух в секунду. Швидкий рух - 5% за раз!
           </p>
         </div>
 

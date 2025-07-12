@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import { loseLife, checkGameOver, getBaseLives, getDisplayLives } from '@/lib/lives'
 
 interface Position {
   x: number
@@ -23,7 +22,7 @@ export default function MazeGame() {
   const [nickname, setNickname] = useState('')
   const [score, setScore] = useState(0)
   const [timeLeft, setTimeLeft] = useState(20)
-  const [lives, setLives] = useState(3)
+
   const [wallMarkers, setWallMarkers] = useState<WallMarker[]>([])
   const router = useRouter()
   const gameInterval = useRef<NodeJS.Timeout | null>(null)
@@ -49,19 +48,10 @@ export default function MazeGame() {
   ]
 
   useEffect(() => {
-    // Check if game is over
-    if (checkGameOver()) {
-      window.location.href = '/'
-      return
-    }
-
     const saved = localStorage.getItem('nickname')
     if (saved) {
       setNickname(saved)
     }
-
-    // Load player lives (base lives only, bonus HP is shown separately)
-    setLives(getBaseLives(1)) // Player ID 1 for Валентин
   }, [])
 
   const startGame = () => {
@@ -87,16 +77,6 @@ export default function MazeGame() {
   const endGame = (result: 'won' | 'lost') => {
     setGameState(result)
     if (gameInterval.current) clearInterval(gameInterval.current)
-    
-    if (result === 'lost') {
-      const gameOver = loseLife(1, 'maze')
-      if (gameOver) {
-        router.push('/')
-        return
-      }
-      // Update lives state with base lives only
-      setLives(getBaseLives(1))
-    }
   }
 
   const resetGame = () => {
@@ -107,8 +87,7 @@ export default function MazeGame() {
     setTouchStart(null)
     // НЕ очищаємо маркери - зберігаємо їх для наступної спроби
     
-    // Reload lives from localStorage (base lives only)
-    setLives(getBaseLives(1))
+
   }
 
   const goToNextGame = () => {
@@ -118,7 +97,7 @@ export default function MazeGame() {
     localStorage.setItem('totalWinnings', newWinnings.toString())
     
     // Mark game as completed
-    localStorage.setItem('gameProgress', '8')
+    localStorage.setItem('gameProgress', '7')
     router.push('/game/elimination')
   }
 
@@ -280,13 +259,7 @@ export default function MazeGame() {
             </div>
           </div>
           <div className="text-white font-mono text-sm space-y-1">
-            <div className="flex items-center">
-              <span className="text-red-400 mr-2">❤️</span>
-              <span>Життя: <span className="text-red-400 font-bold">{'❤️'.repeat(lives)}</span></span>
-            </div>
-            <div className="text-xs text-yellow-400">
-              Бонус: +{Math.max(0, getDisplayLives(1) - lives)} HP
-            </div>
+
             <div className="flex items-center">
               <span className="text-cyan-400 mr-2">🏆</span>
               <span>Рахунок: <span className="text-cyan-400 font-bold">{score}</span></span>

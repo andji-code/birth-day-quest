@@ -1,19 +1,18 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
-import { checkGameOver } from '@/lib/lives'
 
 interface Player {
   id: number
   name: string
   number: string
   avatar: string
+  audioUrl: string
   isAlive: boolean
   isEliminated: boolean
-  lives: number
 }
 
 interface DeathReason {
@@ -30,6 +29,8 @@ export default function EliminationScreen() {
   const [showDeathPopup, setShowDeathPopup] = useState(false)
   const [eliminatedPlayer, setEliminatedPlayer] = useState<Player | null>(null)
   const [deathReason, setDeathReason] = useState('')
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
   const [particles, setParticles] = useState<Array<{id: number, left: number, top: number, delay: number, duration: number}>>([])
   const [eliminationUsed, setEliminationUsed] = useState(false)
   const [eliminationOrder, setEliminationOrder] = useState<{[key: number]: number}>({})
@@ -37,14 +38,14 @@ export default function EliminationScreen() {
   const router = useRouter()
 
   const [players, setPlayers] = useState<Player[]>([
-    { id: 1, name: 'Валентин', number: '012', avatar: 'https://i.pinimg.com/736x/fe/38/aa/fe38aac98a27218a3c1f3ab4cfe55d6a.jpg', isAlive: true, isEliminated: false, lives: 3 },
-    { id: 2, name: 'Андрій', number: '200', avatar: 'https://i.pinimg.com/736x/23/d0/72/23d0726c0089b181582d18f5cf9eff97.jpg', isAlive: true, isEliminated: false, lives: 3 },
-    { id: 3, name: 'Ярік', number: '067', avatar: 'https://i.pinimg.com/736x/5b/82/39/5b8239f7920fffdee4c4e69f64151a90.jpg', isAlive: true, isEliminated: false, lives: 3 },
-    { id: 4, name: 'Діма', number: '228', avatar: 'https://i.pinimg.com/736x/7c/c0/05/7cc00545993bb0f425dc7eeab0b5e227.jpg', isAlive: true, isEliminated: false, lives: 3 },
-    { id: 5, name: 'Міша', number: '237', avatar: 'https://i.pinimg.com/736x/cd/f3/87/cdf3871fa9f13fafc22862679ae20092.jpg', isAlive: true, isEliminated: false, lives: 3 },
-    { id: 6, name: 'Тоха', number: '522', avatar: 'https://i.pinimg.com/736x/8c/86/ed/8c86edca77dca77021f0e3fd3abc60bf.jpg', isAlive: true, isEliminated: false, lives: 3 },
-    { id: 7, name: 'Сон Ґі-Хун', number: '456', avatar: 'https://preview.redd.it/when-you-realize-that-player-456-won-45-6-billion-because-v0-gk7gabfx62fe1.jpeg?width=640&crop=smart&auto=webp&s=e74aa7af38bf857ae0e5f383beb6a8edc30f0be8', isAlive: true, isEliminated: false, lives: 3 },
-    { id: 8, name: 'Guard', number: '069', avatar: 'https://static.wikia.nocookie.net/thesquidgame/images/4/48/Soldier_1.jpg', isAlive: true, isEliminated: false, lives: 3 }
+    { id: 1, name: 'Валентин', number: '012', avatar: 'https://i.pinimg.com/736x/fe/38/aa/fe38aac98a27218a3c1f3ab4cfe55d6a.jpg', audioUrl: '', isAlive: true, isEliminated: false },
+    { id: 2, name: 'Андрій', number: '200', avatar: 'https://i.pinimg.com/736x/23/d0/72/23d0726c0089b181582d18f5cf9eff97.jpg', audioUrl: 'https://one-chat-bucket.s3.eu-north-1.amazonaws.com/common/images/voice_12-07-2025_04-33-24.ogg', isAlive: true, isEliminated: false },
+    { id: 3, name: 'Ярік', number: '067', avatar: 'https://i.pinimg.com/736x/5b/82/39/5b8239f7920fffdee4c4e69f64151a90.jpg', audioUrl: 'https://one-chat-bucket.s3.eu-north-1.amazonaws.com/common/images/voice_11-07-2025_22-02-00.ogg', isAlive: true, isEliminated: false },
+    { id: 4, name: 'Діма', number: '228', avatar: 'https://i.pinimg.com/736x/7c/c0/05/7cc00545993bb0f425dc7eeab0b5e227.jpg', audioUrl: 'https://one-chat-bucket.s3.eu-north-1.amazonaws.com/common/images/voice_11-07-2025_22-48-51.ogg', isAlive: true, isEliminated: false },
+    { id: 5, name: 'Міша', number: '237', avatar: 'https://i.pinimg.com/736x/cd/f3/87/cdf3871fa9f13fafc22862679ae20092.jpg', audioUrl: 'https://one-chat-bucket.s3.eu-north-1.amazonaws.com/common/images/ElevenLabs_2025-07-12T01_35_29_Anton_pvc_sp100_s50_sb75_se0_b_m2.mp3', isAlive: true, isEliminated: false },
+    { id: 6, name: 'Тоха', number: '522', avatar: 'https://i.pinimg.com/736x/8c/86/ed/8c86edca77dca77021f0e3fd3abc60bf.jpg', audioUrl: 'https://one-chat-bucket.s3.eu-north-1.amazonaws.com/common/images/voice_11-07-2025_22-09-26', isAlive: true, isEliminated: false },
+    { id: 7, name: 'Сон Ґі-Хун', number: '456', avatar: 'https://preview.redd.it/when-you-realize-that-player-456-won-45-6-billion-because-v0-gk7gabfx62fe1.jpeg?width=640&crop=smart&auto=webp&s=e74aa7af38bf857ae0e5f383beb6a8edc30f0be8', audioUrl: 'https://one-chat-bucket.s3.eu-north-1.amazonaws.com/common/images/voice_11-07-2025_22-09-26', isAlive: true, isEliminated: false },
+    { id: 8, name: 'Guard', number: '069', avatar: 'https://static.wikia.nocookie.net/thesquidgame/images/4/48/Soldier_1.jpg', audioUrl: "https://one-chat-bucket.s3.eu-north-1.amazonaws.com/common/images/voice_11-07-2025_22-09-26",isAlive: true, isEliminated: false }
   ])
 
   const [deathReasons, setDeathReasons] = useState<DeathReason[]>([
@@ -61,12 +62,6 @@ export default function EliminationScreen() {
 
   useEffect(() => {
     setIsClient(true)
-    
-    // Check if game is over
-    if (checkGameOver()) {
-      router.push('/')
-      return
-    }
     
     const saved = localStorage.getItem('nickname')
     if (saved) {
@@ -118,16 +113,7 @@ export default function EliminationScreen() {
       setEliminationOrder(JSON.parse(savedEliminationOrder))
     }
 
-    // Load player lives
-    const playerLives = localStorage.getItem('playerLives')
-    if (playerLives) {
-      const livesData = JSON.parse(playerLives)
-      setPlayers(prev => prev.map(p => 
-        livesData[p.id] !== undefined 
-          ? { ...p, lives: livesData[p.id] }
-          : p
-      ))
-    }
+
   }, [router])
 
   const eliminateRandomPlayer = () => {
@@ -210,21 +196,39 @@ export default function EliminationScreen() {
         router.push('/game/altcoins')
         break
       case 6:
-        router.push('/game/token-catcher')
-        break
-      case 7:
         router.push('/game/maze')
         break
-      case 8:
+      case 7:
+        router.push('/game/token-catcher')
+        break
+      default:
         // Final elimination - go to winner screen
         router.push('/game/winner')
         break
-      default:
-        router.push('/game/winner')
     }
   }
 
   const aliveCount = players.filter(p => p.isAlive).length
+
+  const playPlayerAudio = (audioUrl: string) => {
+    if (audioRef.current) {
+      audioRef.current.src = audioUrl
+      audioRef.current.play()
+      setIsPlayingAudio(true)
+      
+      audioRef.current.onended = () => {
+        setIsPlayingAudio(false)
+      }
+    }
+  }
+
+  const stopAudio = () => {
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+      setIsPlayingAudio(false)
+    }
+  }
 
   if (!isClient) {
     return (
@@ -349,6 +353,15 @@ export default function EliminationScreen() {
                 }`}>
                   {player.isEliminated ? `ДОЖИВ ДО ТОП: ${eliminationOrder[player.id]}` : 'ЖИВИЙ'}
                 </div>
+                {player.isEliminated && (
+                  <button
+                    onClick={() => playPlayerAudio(player.audioUrl)}
+                    disabled={isPlayingAudio}
+                    className="mt-2 px-3 py-1 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-600 text-white text-xs rounded-none border border-purple-400/60 transition-all duration-200"
+                  >
+                    {isPlayingAudio ? '▶️ Грає...' : '🎵 Як потрапив на гру'}
+                  </button>
+                )}
               </div>
             </div>
           ))}
@@ -391,7 +404,10 @@ export default function EliminationScreen() {
           <Card className="bg-black/90 border border-red-500/40 shadow-2xl shadow-red-500/30 backdrop-blur-md max-w-md mx-4 animate-scaleIn relative">
             {/* Close button */}
             <button
-              onClick={() => setShowDeathPopup(false)}
+              onClick={() => {
+                setShowDeathPopup(false)
+                stopAudio()
+              }}
               className="absolute top-2 right-2 text-red-400 hover:text-red-300 transition-colors duration-200 z-10"
             >
               <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -451,10 +467,22 @@ export default function EliminationScreen() {
               <p className="text-green-400 font-bold">
                 +${currentRound === 8 ? '50' : '10'} до загального виграшу
               </p>
+              
+              {/* Audio button in death popup */}
+              <button
+                onClick={() => playPlayerAudio(eliminatedPlayer.audioUrl)}
+                disabled={isPlayingAudio}
+                className="mt-4 px-4 py-2 bg-purple-600 hover:bg-purple-500 disabled:bg-gray-600 text-white text-sm rounded-none border border-purple-400/60 transition-all duration-200"
+              >
+                {isPlayingAudio ? '▶️ Грає аудіо...' : '🎵 Як потрапив на гру'}
+              </button>
             </CardContent>
           </Card>
         </div>
       )}
+
+      {/* Hidden audio element */}
+      <audio ref={audioRef} />
 
       {/* Enhanced corner decorations */}
       <div className="absolute top-4 left-4 w-12 h-12 border-l-4 border-t-4 border-red-400 opacity-80 animate-pulse"></div>

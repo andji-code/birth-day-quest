@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useRouter } from 'next/navigation'
-import { checkGameOver } from '@/lib/lives'
+
 
 interface PricePoint {
   x: number
@@ -32,12 +32,6 @@ export default function BinaryGame() {
   const candleInterval = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    // Check if game is over
-    if (checkGameOver()) {
-      window.location.href = '/'
-      return
-    }
-
     setIsClient(true)
     const saved = localStorage.getItem('nickname')
     if (saved) {

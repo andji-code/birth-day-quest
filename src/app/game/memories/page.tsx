@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useRouter } from 'next/navigation'
-import { checkGameOver, loseLife, getBaseLives, getDisplayLives } from '@/lib/lives'
+
 
 export default function MemoriesGame() {
   const [gameState, setGameState] = useState<'waiting' | 'playing' | 'won' | 'lost'>('waiting')
@@ -18,7 +18,7 @@ export default function MemoriesGame() {
   const [nickname, setNickname] = useState('')
   const [score, setScore] = useState(0)
   const [timeLeft, setTimeLeft] = useState(60)
-  const [lives, setLives] = useState(3)
+
   const gameInterval = useRef<NodeJS.Timeout | null>(null)
   const router = useRouter()
 
@@ -26,20 +26,11 @@ export default function MemoriesGame() {
   const correctAnswers = ['курка', 'петух', 'скаймаг', 'skywrath mage', 'skywrath']
 
   useEffect(() => {
-    // Check if game is over
-    if (checkGameOver()) {
-      window.location.href = '/'
-      return
-    }
-
     setIsClient(true)
     const saved = localStorage.getItem('nickname')
     if (saved) {
       setNickname(saved)
     }
-    
-    // Load player lives (base lives only, bonus HP is shown separately)
-    setLives(getBaseLives(1)) // Player ID 1 for Валентин
     
     // Generate particles on client side only
     const generatedParticles = Array.from({ length: 20 }, (_, i) => ({
@@ -73,16 +64,6 @@ export default function MemoriesGame() {
   const endGame = (result: 'won' | 'lost') => {
     setGameState(result)
     if (gameInterval.current) clearInterval(gameInterval.current)
-    
-    if (result === 'lost') {
-      const gameOver = loseLife(1, 'memories')
-      if (gameOver) {
-        router.push('/')
-        return
-      }
-      // Update lives state with base lives only
-      setLives(getBaseLives(1))
-    }
   }
 
   const handleSubmitAnswer = () => {
@@ -174,13 +155,7 @@ export default function MemoriesGame() {
             </div>
           </div>
           <div className="text-white font-mono text-sm space-y-1">
-            <div className="flex items-center">
-              <span className="text-red-400 mr-2">❤️</span>
-              <span>Життя: <span className="text-red-400 font-bold">{'❤️'.repeat(lives)}</span></span>
-            </div>
-            <div className="text-xs text-yellow-400">
-              Бонус: +{Math.max(0, getDisplayLives(1) - lives)} HP
-            </div>
+
             <div className="flex items-center">
               <span className="text-purple-400 mr-2">🏆</span>
               <span>Рахунок: <span className="text-purple-400 font-bold">{score}</span></span>
