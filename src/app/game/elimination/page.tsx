@@ -184,26 +184,26 @@ export default function EliminationScreen() {
     // Route to next game based on current round
     switch (nextRound) {
       case 2:
-        router.push('/game/glass-bridge')
+        router.push('/game/glass-bridge/')
         break
       case 3:
-        router.push('/game/illusion')
+        router.push('/game/illusion/')
         break
       case 4:
-        router.push('/game/memories')
+        router.push('/game/memories/')
         break
       case 5:
-        router.push('/game/altcoins')
+        router.push('/game/altcoins/')
         break
       case 6:
-        router.push('/game/token-catcher')
+        router.push('/game/token-catcher/')
         break
       case 7:
-          router.push('/game/maze')
+          router.push('/game/maze/')
           break
       default:
         // Final elimination - go to winner screen
-        router.push('/game/winner')
+        router.push('/game/winner/')
         break
     }
   }
