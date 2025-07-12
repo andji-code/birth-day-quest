@@ -72,7 +72,7 @@ export default function AltcoinsGame() {
     
     // Check if click is in the correct time window (35-40 seconds)
     if (clickTimeValue >= 35 && clickTimeValue <= 40) {
-      setScore(500)
+      setScore(100)
       setWaitTime(clickTimeValue)
       endGame('won')
     } else {
@@ -272,7 +272,7 @@ export default function AltcoinsGame() {
             </CardHeader>
             <CardContent className="text-center space-y-6">
               <p className="text-white text-lg">
-                Ти купив в ідеальний момент! +500% профіту!
+                Ти купив в ідеальний момент! +100% профіту!
               </p>
               <p className="text-yellow-400 text-lg">
                 Ти зачекав: <span className="text-yellow-400 font-bold">{waitTime.toFixed(1)} секунд</span>

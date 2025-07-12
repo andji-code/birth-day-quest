@@ -173,7 +173,7 @@ export default function EliminationScreen() {
   }
 
   const goToNextGame = () => {
-    const nextRound = currentRound + 1
+    const nextRound = currentRound
     setCurrentRound(nextRound)
     localStorage.setItem('gameProgress', nextRound.toString())
     
@@ -196,11 +196,11 @@ export default function EliminationScreen() {
         router.push('/game/altcoins')
         break
       case 6:
-        router.push('/game/maze')
-        break
-      case 7:
         router.push('/game/token-catcher')
         break
+      case 7:
+          router.push('/game/maze')
+          break
       default:
         // Final elimination - go to winner screen
         router.push('/game/winner')

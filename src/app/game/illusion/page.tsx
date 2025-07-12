@@ -148,7 +148,7 @@ export default function IllusionGame() {
   }
 
   const goToNextGame = () => {
-    localStorage.setItem('gameProgress', '3')
+    localStorage.setItem('gameProgress', '4')
     router.push('/game/elimination')
   }
 

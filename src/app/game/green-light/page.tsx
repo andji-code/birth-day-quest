@@ -74,8 +74,8 @@ export default function GreenLightGame() {
     const now = Date.now()
     const timeSinceLastMove = now - lastMoveTime
     
-    // Limit movement to maximum +1 per second (1000ms)
-    if (timeSinceLastMove < 1000) {
+    // Limit movement to maximum +1 per 300ms
+    if (timeSinceLastMove < 300) {
       return // Too soon to move again
     }
     
@@ -111,7 +111,7 @@ export default function GreenLightGame() {
 
   const goToNextGame = () => {
     // Save progress and go to next game
-    localStorage.setItem('gameProgress', '1')
+    localStorage.setItem('gameProgress', '2')
     router.push('/game/elimination')
   }
 
@@ -166,7 +166,7 @@ export default function GreenLightGame() {
             🟢 ЗЕЛЕНЕ-СВІТЛО / ЧЕРВОНЕ-СВІТЛО 🔴
           </h1>
           <p className="text-gray-400 text-sm mt-2">
-            Натискай "РУХ" тільки під час зеленого світла! Максимум 1 рух в секунду. Швидкий рух - 5% за раз!
+            Натискай "РУХ" тільки під час зеленого світла! Максимум 1 рух кожні 300ms. Швидкий рух - 5% за раз!
           </p>
         </div>
 

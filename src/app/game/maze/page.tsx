@@ -21,7 +21,7 @@ export default function MazeGame() {
   const [exitPosition] = useState<Position>({ x: 10, y: 10 })
   const [nickname, setNickname] = useState('')
   const [score, setScore] = useState(0)
-  const [timeLeft, setTimeLeft] = useState(20)
+  const [timeLeft, setTimeLeft] = useState(25)
 
   const [wallMarkers, setWallMarkers] = useState<WallMarker[]>([])
   const router = useRouter()
@@ -97,7 +97,7 @@ export default function MazeGame() {
     localStorage.setItem('totalWinnings', newWinnings.toString())
     
     // Mark game as completed
-    localStorage.setItem('gameProgress', '7')
+    localStorage.setItem('gameProgress', '8')
     router.push('/game/elimination')
   }
 

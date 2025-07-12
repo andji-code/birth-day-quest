@@ -122,7 +122,7 @@ export default function GlassBridgeGame() {
   }
 
   const goToNextGame = () => {
-    localStorage.setItem('gameProgress', '2')
+    localStorage.setItem('gameProgress', '3')
     router.push('/game/elimination')
   }
 

@@ -260,7 +260,7 @@ export default function MemoriesGame() {
                 </Button>
                 <Button
                   onClick={() => {
-                    localStorage.setItem('gameProgress', '4')
+                    localStorage.setItem('gameProgress', '5')
                     router.push('/game/elimination')
                   }}
                   className="flex-1 bg-gradient-to-r from-green-600 to-cyan-600 hover:from-green-500 hover:to-cyan-500 text-white font-bold font-mono text-sm uppercase tracking-wider rounded-none border border-green-400/60 py-4"
