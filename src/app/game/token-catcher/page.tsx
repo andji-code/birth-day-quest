@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
-import { loseLife, checkGameOver } from '@/lib/lives'
+import { loseLife, checkGameOver, getBaseLives, getDisplayLives } from '@/lib/lives'
 
 interface Token {
   id: number
@@ -73,12 +73,8 @@ export default function TokenCatcherGame() {
     }))
     setParticles(generatedParticles)
 
-    // Load player lives
-    const playerLives = localStorage.getItem('playerLives')
-    if (playerLives) {
-      const livesData = JSON.parse(playerLives)
-      setLives(livesData[1] || 3) // Player ID 1 for Валентин
-    }
+    // Load player lives (base lives only, bonus HP is shown separately)
+    setLives(getBaseLives(1)) // Player ID 1 for Валентин
   }, [router])
 
   const startGame = () => {
@@ -138,8 +134,8 @@ export default function TokenCatcherGame() {
         router.push('/')
         return
       }
-      // Update lives state
-      setLives(prev => Math.max(0, prev - 1))
+      // Update lives state with base lives only
+      setLives(getBaseLives(1))
     }
   }
 
@@ -298,11 +294,14 @@ export default function TokenCatcherGame() {
             <div className="flex items-center space-x-1">
               <span className="text-red-400 mr-2">❤️</span>
               <span>Життя:</span>
-              {[1, 2, 3].map((life) => (
-                <span key={life} className="text-lg">
-                  {life <= lives ? '❤️' : '💔'}
+              {[...Array(lives)].map((_, index) => (
+                <span key={index} className="text-lg">
+                  ❤️
                 </span>
               ))}
+            </div>
+            <div className="text-xs text-yellow-400">
+              Бонус: +{Math.max(0, getDisplayLives(1) - lives)} HP
             </div>
             <div className="flex items-center">
               <span className="text-green-400 mr-2">💰</span>

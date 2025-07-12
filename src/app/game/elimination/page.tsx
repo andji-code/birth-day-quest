@@ -9,6 +9,7 @@ import { checkGameOver } from '@/lib/lives'
 interface Player {
   id: number
   name: string
+  number: string
   avatar: string
   isAlive: boolean
   isEliminated: boolean
@@ -36,14 +37,14 @@ export default function EliminationScreen() {
   const router = useRouter()
 
   const [players, setPlayers] = useState<Player[]>([
-    { id: 1, name: 'Валентин', avatar: 'https://i.pinimg.com/736x/fe/38/aa/fe38aac98a27218a3c1f3ab4cfe55d6a.jpg', isAlive: true, isEliminated: false, lives: 3 },
-    { id: 2, name: 'Андрій', avatar: 'https://i.pinimg.com/736x/23/d0/72/23d0726c0089b181582d18f5cf9eff97.jpg', isAlive: true, isEliminated: false, lives: 3 },
-    { id: 3, name: 'Ярік', avatar: 'https://i.pinimg.com/736x/5b/82/39/5b8239f7920fffdee4c4e69f64151a90.jpg', isAlive: true, isEliminated: false, lives: 3 },
-    { id: 4, name: 'Діма', avatar: 'https://i.pinimg.com/736x/7c/c0/05/7cc00545993bb0f425dc7eeab0b5e227.jpg', isAlive: true, isEliminated: false, lives: 3 },
-    { id: 5, name: 'Міша', avatar: 'https://i.pinimg.com/736x/cd/f3/87/cdf3871fa9f13fafc22862679ae20092.jpg', isAlive: true, isEliminated: false, lives: 3 },
-    { id: 6, name: 'Тоха', avatar: 'https://i.pinimg.com/736x/8c/86/ed/8c86edca77dca77021f0e3fd3abc60bf.jpg', isAlive: true, isEliminated: false, lives: 3 },
-    { id: 7, name: '456', avatar: 'https://preview.redd.it/when-you-realize-that-player-456-won-45-6-billion-because-v0-gk7gabfx62fe1.jpeg?width=640&crop=smart&auto=webp&s=e74aa7af38bf857ae0e5f383beb6a8edc30f0be8', isAlive: true, isEliminated: false, lives: 3 },
-    { id: 8, name: 'Guard', avatar: 'https://static.wikia.nocookie.net/thesquidgame/images/4/48/Soldier_1.jpg', isAlive: true, isEliminated: false, lives: 3 }
+    { id: 1, name: 'Валентин', number: '012', avatar: 'https://i.pinimg.com/736x/fe/38/aa/fe38aac98a27218a3c1f3ab4cfe55d6a.jpg', isAlive: true, isEliminated: false, lives: 3 },
+    { id: 2, name: 'Андрій', number: '200', avatar: 'https://i.pinimg.com/736x/23/d0/72/23d0726c0089b181582d18f5cf9eff97.jpg', isAlive: true, isEliminated: false, lives: 3 },
+    { id: 3, name: 'Ярік', number: '067', avatar: 'https://i.pinimg.com/736x/5b/82/39/5b8239f7920fffdee4c4e69f64151a90.jpg', isAlive: true, isEliminated: false, lives: 3 },
+    { id: 4, name: 'Діма', number: '228', avatar: 'https://i.pinimg.com/736x/7c/c0/05/7cc00545993bb0f425dc7eeab0b5e227.jpg', isAlive: true, isEliminated: false, lives: 3 },
+    { id: 5, name: 'Міша', number: '237', avatar: 'https://i.pinimg.com/736x/cd/f3/87/cdf3871fa9f13fafc22862679ae20092.jpg', isAlive: true, isEliminated: false, lives: 3 },
+    { id: 6, name: 'Тоха', number: '522', avatar: 'https://i.pinimg.com/736x/8c/86/ed/8c86edca77dca77021f0e3fd3abc60bf.jpg', isAlive: true, isEliminated: false, lives: 3 },
+    { id: 7, name: 'Сон Ґі-Хун', number: '456', avatar: 'https://preview.redd.it/when-you-realize-that-player-456-won-45-6-billion-because-v0-gk7gabfx62fe1.jpeg?width=640&crop=smart&auto=webp&s=e74aa7af38bf857ae0e5f383beb6a8edc30f0be8', isAlive: true, isEliminated: false, lives: 3 },
+    { id: 8, name: 'Guard', number: '069', avatar: 'https://static.wikia.nocookie.net/thesquidgame/images/4/48/Soldier_1.jpg', isAlive: true, isEliminated: false, lives: 3 }
   ])
 
   const [deathReasons, setDeathReasons] = useState<DeathReason[]>([
@@ -147,7 +148,7 @@ export default function EliminationScreen() {
     ))
 
     // Update elimination order
-    const currentEliminationCount = Object.keys(eliminationOrder).length + 1
+    const currentEliminationCount = 8 - Object.keys(eliminationOrder).length
     const newEliminationOrder = {
       ...eliminationOrder,
       [randomPlayer.id]: currentEliminationCount
@@ -338,6 +339,11 @@ export default function EliminationScreen() {
                 }`}>
                   {player.name}
                 </div>
+                <div className={`text-xs font-mono ${
+                  player.isEliminated ? 'text-red-400' : 'text-yellow-400'
+                }`}>
+                  #{player.number}
+                </div>
                 <div className={`text-xs ${
                   player.isEliminated ? 'text-red-400' : 'text-gray-400'
                 }`}>
@@ -432,6 +438,9 @@ export default function EliminationScreen() {
               
               <p className="text-white text-lg font-bold">
                 {eliminatedPlayer.name}
+              </p>
+              <p className="text-yellow-400 text-sm font-mono">
+                #{eliminatedPlayer.number}
               </p>
               <p className="text-red-400 text-sm">
                 {deathReason}

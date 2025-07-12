@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { useRouter } from 'next/navigation'
-import { checkGameOver, loseLife } from '@/lib/lives'
+import { checkGameOver, loseLife, getBaseLives, getDisplayLives } from '@/lib/lives'
 
 export default function AltcoinsGame() {
   const [gameState, setGameState] = useState<'waiting' | 'playing' | 'won' | 'lost'>('waiting')
@@ -34,12 +34,8 @@ export default function AltcoinsGame() {
       setNickname(saved)
     }
     
-    // Load player lives
-    const playerLives = localStorage.getItem('playerLives')
-    if (playerLives) {
-      const livesData = JSON.parse(playerLives)
-      setLives(livesData[1] || 3) // Player ID 1 for Валентин
-    }
+    // Load player lives (base lives only, bonus HP is shown separately)
+    setLives(getBaseLives(1)) // Player ID 1 for Валентин
     
     // Generate particles on client side only
     const generatedParticles = Array.from({ length: 30 }, (_, i) => ({
@@ -84,8 +80,8 @@ export default function AltcoinsGame() {
         router.push('/')
         return
       }
-      // Update lives state
-      setLives(prev => Math.max(0, prev - 1))
+      // Update lives state with base lives only
+      setLives(getBaseLives(1))
     }
   }
 
@@ -113,12 +109,8 @@ export default function AltcoinsGame() {
     setCurrentPrice(0)
     setWaitTime(0)
     
-    // Reload lives from localStorage
-    const playerLives = localStorage.getItem('playerLives')
-    if (playerLives) {
-      const livesData = JSON.parse(playerLives)
-      setLives(livesData[1] || 3)
-    }
+    // Reload lives from localStorage (base lives only)
+    setLives(getBaseLives(1))
   }
 
   const goToNextGame = () => {
@@ -199,6 +191,9 @@ export default function AltcoinsGame() {
             <div className="flex items-center">
               <span className="text-red-400 mr-2">❤️</span>
               <span>Життя: <span className="text-red-400 font-bold">{'❤️'.repeat(lives)}</span></span>
+            </div>
+            <div className="text-xs text-yellow-400">
+              Бонус: +{Math.max(0, getDisplayLives(1) - lives)} HP
             </div>
             <div className="flex items-center">
               <span className="text-cyan-400 mr-2">🏆</span>

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
-import { loseLife, checkGameOver } from '@/lib/lives'
+import { loseLife, checkGameOver, getBaseLives, getDisplayLives } from '@/lib/lives'
 
 interface Position {
   x: number
@@ -60,12 +60,8 @@ export default function MazeGame() {
       setNickname(saved)
     }
 
-    // Load player lives
-    const playerLives = localStorage.getItem('playerLives')
-    if (playerLives) {
-      const livesData = JSON.parse(playerLives)
-      setLives(livesData[1] || 3) // Player ID 1 for Валентин
-    }
+    // Load player lives (base lives only, bonus HP is shown separately)
+    setLives(getBaseLives(1)) // Player ID 1 for Валентин
   }, [])
 
   const startGame = () => {
@@ -98,8 +94,8 @@ export default function MazeGame() {
         router.push('/')
         return
       }
-      // Update lives state
-      setLives(prev => Math.max(0, prev - 1))
+      // Update lives state with base lives only
+      setLives(getBaseLives(1))
     }
   }
 
@@ -111,12 +107,8 @@ export default function MazeGame() {
     setTouchStart(null)
     // НЕ очищаємо маркери - зберігаємо їх для наступної спроби
     
-    // Reload lives from localStorage
-    const playerLives = localStorage.getItem('playerLives')
-    if (playerLives) {
-      const livesData = JSON.parse(playerLives)
-      setLives(livesData[1] || 3)
-    }
+    // Reload lives from localStorage (base lives only)
+    setLives(getBaseLives(1))
   }
 
   const goToNextGame = () => {
@@ -291,6 +283,9 @@ export default function MazeGame() {
             <div className="flex items-center">
               <span className="text-red-400 mr-2">❤️</span>
               <span>Життя: <span className="text-red-400 font-bold">{'❤️'.repeat(lives)}</span></span>
+            </div>
+            <div className="text-xs text-yellow-400">
+              Бонус: +{Math.max(0, getDisplayLives(1) - lives)} HP
             </div>
             <div className="flex items-center">
               <span className="text-cyan-400 mr-2">🏆</span>

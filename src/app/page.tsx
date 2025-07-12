@@ -277,15 +277,26 @@ export default function Home() {
                   <p className="text-white font-bold text-sm">
                     Welcome back, <span className="text-cyan-400 font-black uppercase tracking-wider">{savedNickname}</span>! 🎉
                   </p>
+                  <p className="text-yellow-400 font-mono text-xs mt-1">
+                    Player #{savedNickname === 'валентин' ? '012' : 
+                           savedNickname === 'андрій' ? '200' :
+                           savedNickname === 'ярік' ? '067' :
+                           savedNickname === 'діма' ? '228' :
+                           savedNickname === 'міша' ? '237' :
+                           savedNickname === 'тоха' ? '522' :
+                           savedNickname === '456' ? '456' :
+                           savedNickname === 'guard' ? '069' : '???'}
+                  </p>
                 </div>
                 <div className="flex space-x-2">
                   <Button
                     onClick={() => {
-                      // Save the game over year and player lives if they exist
+                      // Save the game over year, player lives, and failed games if they exist
                       const gameOverYear = localStorage.getItem('gameOverYear')
                       const playerLives = localStorage.getItem('playerLives')
+                      const failedGames = localStorage.getItem('failedGames')
                       
-                      // Clear all localStorage except game over year and player lives
+                      // Clear all localStorage except game over year, player lives, and failed games
                       localStorage.clear()
                       
                       // Restore game over year if it existed
@@ -296,6 +307,11 @@ export default function Home() {
                       // Restore player lives if they existed
                       if (playerLives) {
                         localStorage.setItem('playerLives', playerLives)
+                      }
+                      
+                      // Restore failed games if they existed
+                      if (failedGames) {
+                        localStorage.setItem('failedGames', failedGames)
                       }
                       
                       setSavedNickname('')
