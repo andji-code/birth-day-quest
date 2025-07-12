@@ -325,31 +325,31 @@ export default function Home() {
                         const round = parseInt(progress)
                         switch (round) {
                           case 1:
-                            window.location.href = '/game/green-light'
+                            window.location.href = '/birth-day-quest/game/green-light'
                             break
                           case 2:
-                            window.location.href = '/game/glass-bridge'
+                            window.location.href = '/birth-day-quest/game/glass-bridge'
                             break
                           case 3:
-                            window.location.href = '/game/illusion'
+                            window.location.href = '/birth-day-quest/game/illusion'
                             break
                           case 4:
-                            window.location.href = '/game/memories'
+                            window.location.href = '/birth-day-quest/game/memories'
                             break
                           case 5:
-                            window.location.href = '/game/altcoins'
+                            window.location.href = '/birth-day-quest/game/altcoins'
                             break
                           case 6:
-                            window.location.href = '/game/token-catcher'
+                            window.location.href = '/birth-day-quest/game/token-catcher'
                             break
                           case 7:
-                            window.location.href = '/game/maze'
+                            window.location.href = '/birth-day-quest/game/maze'
                             break
                           default:
-                            window.location.href = '/game/green-light'
+                            window.location.href = '/birth-day-quest/game/green-light'
                         }
                       } else {
-                        window.location.href = '/game/green-light'
+                        window.location.href = '/birth-day-quest/game/green-light'
                       }
                     }}
                     className="flex-1 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white font-bold font-mono text-xs uppercase tracking-wider rounded-none border border-yellow-400/60 shadow-lg shadow-yellow-500/25"

@@ -112,7 +112,7 @@ export default function GreenLightGame() {
   const goToNextGame = () => {
     // Save progress and go to next game
     localStorage.setItem('gameProgress', '2')
-    router.push('/birth-day-quest/game/elimination/')
+    router.push('/game/elimination/')
   }
 
   useEffect(() => {

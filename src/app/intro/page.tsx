@@ -17,7 +17,7 @@ export default function Intro() {
   }, [])
 
   const handleStartGame = () => {
-    router.push('/birth-day-quest/game/green-light')
+    router.push('/game/green-light')
   }
 
   return (

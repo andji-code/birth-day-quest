@@ -94,7 +94,7 @@ export default function AltcoinsGame() {
 
   const goToNextGame = () => {
     localStorage.setItem('gameProgress', '6')
-    router.push('/birth-day-quest/game/elimination/')
+    router.push('/game/elimination/')
   }
 
   const getPriceColor = (price: number) => {

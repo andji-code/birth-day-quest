@@ -149,7 +149,7 @@ export default function IllusionGame() {
 
   const goToNextGame = () => {
     localStorage.setItem('gameProgress', '4')
-    router.push('/birth-day-quest/game/elimination/')
+    router.push('/game/elimination/')
   }
 
   if (!isClient) {

@@ -184,26 +184,26 @@ export default function EliminationScreen() {
     // Route to next game based on current round
     switch (nextRound) {
       case 2:
-        router.push('/birth-day-quest/game/glass-bridge/')
+        router.push('/game/glass-bridge/')
         break
       case 3:
-        router.push('/birth-day-quest/game/illusion/')
+        router.push('/game/illusion/')
         break
       case 4:
-        router.push('/birth-day-quest/game/memories/')
+        router.push('/game/memories/')
         break
       case 5:
-        router.push('/birth-day-quest/game/altcoins/')
+        router.push('/game/altcoins/')
         break
       case 6:
-        router.push('/birth-day-quest/game/token-catcher/')
+        router.push('/game/token-catcher/')
         break
       case 7:
-          router.push('/birth-day-quest/game/maze/')
+          router.push('/game/maze/')
           break
       default:
         // Final elimination - go to winner screen
-        router.push('/birth-day-quest/game/winner/')
+        router.push('/game/winner/')
         break
     }
   }
